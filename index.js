@@ -7,6 +7,10 @@ const PubSub = require('./app/pubsub');
 const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const TransactionMiner = require('./app/transaction-miner');
+const BankAccount = require('./database/models/AccountSchema');
+const db=require('./database/db')
+const mongoose = require('mongoose');
+db.getDatabase()
 
 const isDevelopment = process.env.ENV === 'development';
 
@@ -22,6 +26,40 @@ const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wal
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'client/dist')));
+
+//account
+
+// Create a new bank account
+app.post('/api/bankaccounts', async (req, res) => {
+  try {
+    
+    req.body.balance=Math.ceil(Math.random()*10000);
+    const bankAccount = await BankAccount.create(req.body);
+
+    console.log('request from frontend:',req.body);
+    res.json(bankAccount);
+
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get all bank accounts
+app.get('/api/bankaccounts', async (req, res) => {
+  try {
+    const bankAccounts = await BankAccount.find();
+    res.json(bankAccounts);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+
+
+
+//
+
+
 
 app.get('/api/blocks', (req, res) => {
   res.json(blockchain.chain);
@@ -125,7 +163,7 @@ const syncWithRootState = () => {
     if (!error && response.statusCode === 200) {
       const rootChain = JSON.parse(body);
 
-      // console.log('replace chain on a sync with', rootChain);
+      console.log('replace chain on a sync with', rootChain);
       blockchain.replaceChain(rootChain);
     }
   });
@@ -134,7 +172,7 @@ const syncWithRootState = () => {
     if (!error && response.statusCode === 200) {
       const rootTransactionPoolMap = JSON.parse(body);
 
-      // console.log('replace transaction pool map on a sync with', rootTransactionPoolMap);
+      console.log('replace transaction pool map on a sync with', rootTransactionPoolMap);
       transactionPool.setMap(rootTransactionPoolMap);
     }
   });

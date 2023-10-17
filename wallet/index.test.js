@@ -9,6 +9,7 @@ describe('Wallet', () => {
 
   beforeEach(() => {
     wallet = new Wallet();
+    console.log("key pair :",type(wallet.keyPair));
   });
 
   it('has a `balance`', () => {

@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { Component,useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
-
+import AccountData from './AccountData' 
 class App extends Component {
   state = { walletInfo: {} };
 
@@ -18,8 +18,11 @@ class App extends Component {
       <div className="App">
         <img className='logo' src={logo}></img>
         <br />
+        
+        
         <div>Welcome to the blockchain...</div>
         <br />
+        <AccountData/>
         <div><Link to='/blocks'>Blocks</Link></div>
         <div><Link to='/conduct-transaction'>Conduct a Transaction</Link></div>
         <div><Link to='/transaction-pool'>Transaction Pool</Link></div>
