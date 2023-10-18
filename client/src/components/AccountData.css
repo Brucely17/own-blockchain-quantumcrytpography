@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* .container {
+=======
+.container {
+>>>>>>> origin/main
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -34,6 +38,7 @@
   
   .button:hover {
     background-color: #0056b3;
+<<<<<<< HEAD
   } */
   /* AccountData.css */
 
@@ -105,3 +110,7 @@ body {
 .container {
   animation: fadeIn 1s;
 }
+=======
+  }
+  
+>>>>>>> origin/main

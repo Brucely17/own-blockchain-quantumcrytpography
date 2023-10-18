@@ -8,9 +8,13 @@ const PubSub = require('./app/pubsub');
 const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const TransactionMiner = require('./app/transaction-miner');
+<<<<<<< HEAD
 const BankAccount = require('./database/models/BankAccountSchema');
 const User = require('./database/models/UserSchema');
 const walletAccount=require('./database/models/WalletSchema');
+=======
+const BankAccount = require('./database/models/AccountSchema');
+>>>>>>> origin/main
 const db=require('./database/db')
 const mongoose = require('mongoose');
 db.getDatabase()
@@ -31,6 +35,7 @@ const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wal
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
+<<<<<<< HEAD
 
 //signup -------- login
 
@@ -104,11 +109,14 @@ else if (state=='signup'){
 
 
 
+=======
+>>>>>>> origin/main
 //account
 
 // Create a new bank account
 app.post('/api/bankaccounts', async (req, res) => {
   try {
+<<<<<<< HEAD
 
     // const wallet = new Wallet(req.body[balance]);
     
@@ -123,6 +131,13 @@ app.post('/api/bankaccounts', async (req, res) => {
     // Save the bankAccount to update the bankAccountId
     await bankAccount.save();
     console.log('request from frontend:',req.body,bankAccount.bankAccountId);
+=======
+    
+    req.body.balance=Math.ceil(Math.random()*10000);
+    const bankAccount = await BankAccount.create(req.body);
+
+    console.log('request from frontend:',req.body);
+>>>>>>> origin/main
     res.json(bankAccount);
 
   } catch (error) {
@@ -249,7 +264,7 @@ const syncWithRootState = () => {
     if (!error && response.statusCode === 200) {
       const rootChain = JSON.parse(body);
 
-      // console.log('replace chain on a sync with', rootChain);
+      console.log('replace chain on a sync with', rootChain);
       blockchain.replaceChain(rootChain);
     }
   });
@@ -258,7 +273,7 @@ const syncWithRootState = () => {
     if (!error && response.statusCode === 200) {
       const rootTransactionPoolMap = JSON.parse(body);
 
-      // console.log('replace transaction pool map on a sync with', rootTransactionPoolMap);
+      console.log('replace transaction pool map on a sync with', rootTransactionPoolMap);
       transactionPool.setMap(rootTransactionPoolMap);
     }
   });
