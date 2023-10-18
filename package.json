@@ -24,6 +24,11 @@
     "nodemon": "^1.18.4"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.14",
+    "@mui/material": "^5.14.14",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "elliptic": "^6.4.1",
@@ -38,6 +43,7 @@
     "react-dom": "^16.14.0",
     "react-router-dom": "^4.3.1",
     "request": "^2.88.0",
+    "test": "^3.3.0",
     "uuid": "^3.3.2"
   }
 }

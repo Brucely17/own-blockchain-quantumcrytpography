@@ -6,8 +6,10 @@ const AccountData = () => {
     name: '',
     ifscCode: '',
     phoneNumber: '',
+    email:'',
     balance:0,
-    
+   
+   
    
   });
 
@@ -49,10 +51,10 @@ const AccountData = () => {
           <label htmlFor="phoneNumber" className='label'>Phone Number: </label>
           <input type="text" id="phoneNumber" className='input'  onChange={handleChange} />
         </div>
-        {/* <div>
-          <label htmlFor="balance" className='label'>Balance: </label>
-          <input type="number" id="balance" className='input' onChange={handleChange} />
-        </div> */}
+        <div>
+          <label htmlFor="email" className='label'>Email Id: </label>
+          <input type="email" id="email" className='input' onChange={handleChange} />
+        </div>
         <button type="submit" className='button'>Create Account</button>
       </form>
     </div>

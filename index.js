@@ -2,12 +2,19 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const request = require('request');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 const Blockchain = require('./blockchain');
 const PubSub = require('./app/pubsub');
 const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const TransactionMiner = require('./app/transaction-miner');
+<<<<<<< HEAD
+const BankAccount = require('./database/models/BankAccountSchema');
+const User = require('./database/models/UserSchema');
+const walletAccount=require('./database/models/WalletSchema');
+=======
 const BankAccount = require('./database/models/AccountSchema');
+>>>>>>> origin/main
 const db=require('./database/db')
 const mongoose = require('mongoose');
 db.getDatabase()
@@ -20,23 +27,117 @@ const ROOT_NODE_ADDRESS = `http://localhost:${DEFAULT_PORT}`;
 const app = express();
 const blockchain = new Blockchain();
 const transactionPool = new TransactionPool();
-const wallet = new Wallet();
+const wallet =new Wallet();
+
 const pubsub = new PubSub({ blockchain, transactionPool });
 const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wallet, pubsub });
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
+<<<<<<< HEAD
+
+//signup -------- login
+
+// app.post('/signup',async(req,res)=>{
+//   const {username,password}=req.body;
+//   try {
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const user = await User.create({
+//       username,
+     
+//       password: hashedPassword
+//     });
+
+//     res.status(201).json({ user });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+app.post('/login', async (req, res) => {
+  const { state,username, password } = req.body;
+
+  if (state=='login'){
+  try {
+    const foundUser = await User.findOne({ username });
+
+    if (!foundUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+  
+    const isPasswordValid = await bcrypt.compare(password, foundUser.password);
+  
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+  
+    res.status(200).json({ username: foundUser,bank: foundUser.bankAccounts,status:true });
+    // res.redirect('/')
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+
+}
+//signup 
+
+else if (state=='signup'){
+  try {
+    const existingUser = await User.findOne({ username });
+
+    if (existingUser) {
+      return res.status(409).json({ error: 'Username already exists' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      username,
+     
+      password: hashedPassword
+    });
+
+    res.status(201).json({ user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+});
+
+
+
+
+
+
+=======
+>>>>>>> origin/main
 //account
 
 // Create a new bank account
 app.post('/api/bankaccounts', async (req, res) => {
   try {
+<<<<<<< HEAD
+
+    // const wallet = new Wallet(req.body[balance]);
+    
+    // req.body[publicKey]=wallet.publicKey;
+    // console.log('Bankaccount details:',wallet.balance,wallet.keyPair,wallet.publicKey )
+    req.body.balance=Math.ceil(Math.random()*100000)
+    const bankAccount = await BankAccount.create(req.body);
+
+    // Set bankAccountId to the string representation of _id
+    bankAccount.bankAccountId = bankAccount._id.toString();
+
+    // Save the bankAccount to update the bankAccountId
+    await bankAccount.save();
+    console.log('request from frontend:',req.body,bankAccount.bankAccountId);
+=======
     
     req.body.balance=Math.ceil(Math.random()*10000);
     const bankAccount = await BankAccount.create(req.body);
 
     console.log('request from frontend:',req.body);
+>>>>>>> origin/main
     res.json(bankAccount);
 
   } catch (error) {

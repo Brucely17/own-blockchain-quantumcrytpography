@@ -22,10 +22,15 @@ class App extends Component {
         
         <div>Welcome to the blockchain...</div>
         <br />
+<<<<<<< HEAD
+        <button><Link to ='/bankaccount'>Create Account</Link></button>
+=======
         <AccountData/>
+>>>>>>> origin/main
         <div><Link to='/blocks'>Blocks</Link></div>
         <div><Link to='/conduct-transaction'>Conduct a Transaction</Link></div>
         <div><Link to='/transaction-pool'>Transaction Pool</Link></div>
+        <button><Link to ='/login'> Login</Link></button>
         <br />
         <div className='WalletInfo'>
           <div>Address: {address}</div>

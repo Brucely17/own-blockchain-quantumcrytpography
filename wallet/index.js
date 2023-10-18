@@ -14,6 +14,7 @@ class Wallet {
   }
 
   sign(data) {
+    console.log('signing data:',this.keyPair.sign(cryptoHash(data)));
     return this.keyPair.sign(cryptoHash(data));
   }
 
