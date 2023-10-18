@@ -3,8 +3,10 @@ const { STARTING_BALANCE } = require('../config');
 const { ec, cryptoHash } = require('../util');
 
 class Wallet {
-  constructor() {
-    this.balance = STARTING_BALANCE;
+  constructor(STARTING_BALANCE) {
+    
+
+    this.balance =STARTING_BALANCE||0;
 
     this.keyPair = ec.genKeyPair();
 
@@ -12,6 +14,7 @@ class Wallet {
   }
 
   sign(data) {
+    console.log('signing data:',this.keyPair.sign(cryptoHash(data)));
     return this.keyPair.sign(cryptoHash(data));
   }
 
