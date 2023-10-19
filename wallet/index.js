@@ -1,21 +1,27 @@
 const Transaction = require('./transaction');
 const { STARTING_BALANCE } = require('../config');
 const { ec, cryptoHash } = require('../util');
-
+const crypto = require('crypto');
 class Wallet {
-  constructor(STARTING_BALANCE) {
+  constructor(balance) {
     
 
-    this.balance =STARTING_BALANCE||0;
+    this.balance =balance||0;
 
     this.keyPair = ec.genKeyPair();
-
+    
+    // this.privateKey=this.keyPair.getPrivate().toBuffer().digest('hex');
+    console.log('pribate key:',this.keyPair.getPrivate('hex'));
+    console.log('parsed:',JSON.parse(JSON.stringify(this.keyPair)),'compare:',this.keyPair);
+    this.privateKey=this.keyPair.getPrivate('hex');
     this.publicKey = this.keyPair.getPublic().encode('hex');
+    console.log(this.publicKey);
   }
 
   sign(data) {
-    console.log('signing data:',this.keyPair.sign(cryptoHash(data)));
-    return this.keyPair.sign(cryptoHash(data));
+    // console.log('signing data:',this.privateKey.sign(cryptoHash(data)));
+    console.log('signing data  check:',(ec.sign(cryptoHash(data),this.keyPair.getPrivate('hex'))).toDER('hex'))
+    return (ec.sign(cryptoHash(data),this.keyPair.getPrivate('hex'))).toDER('hex');
   }
 
   createTransaction({ recipient, amount, chain }) {

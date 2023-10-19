@@ -4,7 +4,7 @@ const walletSchema = new mongoose.Schema({
   publicKey: { type: String, required: true },
   privateKey: { type: String, required: true },
   balance: { type: Number, required: true },
-  bankAccountId: { type: String, ref: 'BankAccount' } // Reference to bank account
+  bankAccountId: { type: String} // Reference to bank account
 });
 
 const Wallet = mongoose.model('Wallet', walletSchema);

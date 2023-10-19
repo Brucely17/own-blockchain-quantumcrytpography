@@ -159,7 +159,8 @@ function LoginBox({history}) {
         if (data.status==true){
           console.log('yes its true')
           if (data.bank.length==0){
-            history.push('/bankaccount');
+
+            history.push(`/bankaccount`);
           }
         }
         
