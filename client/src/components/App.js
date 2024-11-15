@@ -120,6 +120,7 @@ class App extends Component {
       <div className="App">
         <img className="logo" src={logo} alt="logo" />
         
+<<<<<<< HEAD
         <div className="card-container">
           {cardLinks.map((link, index) => (
             <Card
@@ -133,6 +134,21 @@ class App extends Component {
           ))}
         </div>
 
+=======
+        
+        <div>Welcome to the blockchain...</div>
+        <br />
+<<<<<<< HEAD
+        <button><Link to ='/bankaccount'>Create Account</Link></button>
+=======
+        <AccountData/>
+>>>>>>> origin/main
+        <div><Link to='/blocks'>Blocks</Link></div>
+        <div><Link to='/conduct-transaction'>Conduct a Transaction</Link></div>
+        <div><Link to='/transaction-pool'>Transaction Pool</Link></div>
+        <button><Link to ='/login'> Login</Link></button>
+        <br />
+>>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
         <div className='WalletInfo'>
         <>
           <div>Address: {address}</div>

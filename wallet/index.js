@@ -19,11 +19,16 @@ class Wallet {
   }
 
   sign(data) {
+<<<<<<< HEAD
 
     // console.log('signing data:',this.privateKey.sign(cryptoHash(data)));
     // console.log('signing data  check:',(ec.sign(cryptoHash(data),this.keyPair.getPrivate('hex'))).toDER('hex'))
     
     return (ec.sign(cryptoHash(data),this.keyPair.getPrivate('hex'))).toDER('hex');
+=======
+    console.log('signing data:',this.keyPair.sign(cryptoHash(data)));
+    return this.keyPair.sign(cryptoHash(data));
+>>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
   }
 
   createTransaction({ recipient, amount, chain }) {

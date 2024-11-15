@@ -8,9 +8,19 @@ const PubSub = require('./app/pubsub');
 const TransactionPool = require('./wallet/transaction-pool');
 const Wallet = require('./wallet');
 const TransactionMiner = require('./app/transaction-miner');
+<<<<<<< HEAD
 const BankAccount = require('./database/models/BankAccountSchema');
 const User = require('./database/models/UserSchema');
 const WalletAccount=require('./database/models/WalletSchema');
+=======
+<<<<<<< HEAD
+const BankAccount = require('./database/models/BankAccountSchema');
+const User = require('./database/models/UserSchema');
+const walletAccount=require('./database/models/WalletSchema');
+=======
+const BankAccount = require('./database/models/AccountSchema');
+>>>>>>> origin/main
+>>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
 const db=require('./database/db')
 const mongoose = require('mongoose');
 const KnownAddress = require('./database/models/KnownAddresses');
@@ -33,6 +43,10 @@ const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wal
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
 
 //signup -------- login
 
@@ -55,7 +69,11 @@ app.use(express.static(path.join(__dirname, 'client/dist')));
 
 app.post('/login', async (req, res) => {
   const { state,username, password } = req.body;
+<<<<<<< HEAD
   console.log(state,username,password);
+=======
+
+>>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
   if (state=='login'){
   try {
     const foundUser = await User.findOne({ username });
@@ -106,11 +124,17 @@ else if (state=='signup'){
 
 
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> origin/main
+>>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
 //account
 
 // Create a new bank account
 app.post('/api/bankaccounts', async (req, res) => {
   try {
+<<<<<<< HEAD
 
     // const wallet = new Wallet(req.body[balance]);
     
@@ -153,6 +177,30 @@ app.post('/api/bankaccounts', async (req, res) => {
     // await knownAddr.save();
     // console.log()
     console.log('request from frontend:',req.body,bankAccount.bankAccountId,username,existingUser);
+=======
+<<<<<<< HEAD
+
+    // const wallet = new Wallet(req.body[balance]);
+    
+    // req.body[publicKey]=wallet.publicKey;
+    // console.log('Bankaccount details:',wallet.balance,wallet.keyPair,wallet.publicKey )
+    req.body.balance=Math.ceil(Math.random()*100000)
+    const bankAccount = await BankAccount.create(req.body);
+
+    // Set bankAccountId to the string representation of _id
+    bankAccount.bankAccountId = bankAccount._id.toString();
+
+    // Save the bankAccount to update the bankAccountId
+    await bankAccount.save();
+    console.log('request from frontend:',req.body,bankAccount.bankAccountId);
+=======
+    
+    req.body.balance=Math.ceil(Math.random()*10000);
+    const bankAccount = await BankAccount.create(req.body);
+
+    console.log('request from frontend:',req.body);
+>>>>>>> origin/main
+>>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
     res.json(bankAccount);
 
   } catch (error) {
