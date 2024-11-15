@@ -13,6 +13,8 @@ const User = require('./database/models/UserSchema');
 const WalletAccount=require('./database/models/WalletSchema');
 const db=require('./database/db')
 const mongoose = require('mongoose');
+const KnownAddress = require('./database/models/KnownAddresses');
+const {VALIDATORS}=require('./config')
 db.getDatabase()
 
 const isDevelopment = process.env.ENV === 'development';
@@ -53,7 +55,7 @@ app.use(express.static(path.join(__dirname, 'client/dist')));
 
 app.post('/login', async (req, res) => {
   const { state,username, password } = req.body;
-
+  console.log(state,username,password);
   if (state=='login'){
   try {
     const foundUser = await User.findOne({ username });
@@ -116,9 +118,10 @@ app.post('/api/bankaccounts', async (req, res) => {
     // console.log('Bankaccount details:',wallet.balance,wallet.keyPair,wallet.publicKey )
     req.body.balance=Math.ceil(Math.random()*100000)
     const bankAccount = await BankAccount.create(req.body);
-
+    console.log(bankAccount);
     // Set bankAccountId to the string representation of _id
     bankAccount.bankAccountId = bankAccount._id.toString();
+    console.log(bankAccount);
 
     // Save the bankAccount to update the bankAccountId
     await bankAccount.save();
@@ -129,9 +132,10 @@ app.post('/api/bankaccounts', async (req, res) => {
     if (existingUser){
       existingUser.bankAccounts.push(bankAccount.bankAccountId);
       console.log('existingUser:',existingUser);
+      await existingUser.save()
     }
     //linking with user
-    await existingUser.save();
+    
 
     //creating wallet
     const wallet =new Wallet(bankAccount.balance);
@@ -141,6 +145,13 @@ app.post('/api/bankaccounts', async (req, res) => {
         balance:wallet.balance,
         bankAccountId:bankAccount.bankAccountId
     });
+    // const knownAddr=await KnownAddress.create({
+    //   publicKey:wallet.publicKey,
+    //   name:bankAccount.name
+
+    // });
+    // await knownAddr.save();
+    // console.log()
     console.log('request from frontend:',req.body,bankAccount.bankAccountId,username,existingUser);
     res.json(bankAccount);
 
@@ -175,6 +186,20 @@ app.get('/api/blocks/length', (req, res) => {
   res.json(blockchain.chain.length);
 });
 
+
+app.post("/?username",async(req,res)=>{
+const username=req.body;
+// const username=req.body;
+const bankAccount=await BankAccount.findOne({username});
+
+console.log(bankAccount,bankAccount.bankAccountId);
+const bankid=bankAccount.bankAccountId;
+const wallet=await BankAccount.findOne({bankid});
+console.log(wallet);
+res.json(wallet);
+
+
+})
 app.get('/api/blocks/:id', (req, res) => {
   const { id } = req.params;
   const { length } = blockchain.chain;
@@ -233,20 +258,47 @@ app.get('/api/transaction-pool-map', (req, res) => {
 
 app.get('/api/mine-transactions', (req, res) => {
   transactionMiner.mineTransactions();
+  
 
   res.redirect('/api/blocks');
 });
 
-app.get('/api/wallet-info', (req, res) => {
+// app.post('/api/walet-info',async(req,res)=>{
+//   const username=req.body;
+//   const bankAccount=await BankAccount.findOne({username});
+
+//   console.log(bankAccount,bankAccount.bankAccountId);
+//   const bankid=bankAccount.bankAccountId;
+//   const wallet=await BankAccount.findOne({bankid});
+//   console.log(wallet);
+//   res.json(wallet);
+// })
+app.get('/api/wallet-info', async(req, res) => {
   const address = wallet.publicKey;
 
   res.json({
     address,
     balance: Wallet.calculateBalance({ chain: blockchain.chain, address })
   });
+  // const bankAccountId=req.body.bankAccountId;
+  // console.log(bankAccountId,{bankAccountId});
+  // // const address = wallet.publicKey;
+  // const bank=await BankAccount.findOne({bankAccountId});
+  // const name=bank.name;
+  // console.log(name);
+  // const wallet =await WalletAccount.findOne({bankAccountId});
+  // console.log("wallet is :",wallet);
+  // const address=wallet.publicKey;
+  // const balance=wallet.balance;
+  // res.json({
+  //   name,
+  //   address,
+  //   balance: Wallet.calculateBalance({ chain: blockchain.chain, address })
+    
+  // });
 });
 
-app.get('/api/known-addresses', (req, res) => {
+app.get('/api/known-addresses',async (req, res) => {
   const addressMap = {};
 
   for (let block of blockchain.chain) {
@@ -258,6 +310,32 @@ app.get('/api/known-addresses', (req, res) => {
   }
 
   res.json(Object.keys(addressMap));
+  // const knownAddr=await KnownAddress.find();
+  // console.log(knownAddr);
+  // res.json(knownAddr);
+
+});
+
+
+// merkleetree
+const MerkleTree = require('./TrieRoot/merkleeTree'); // Update the path to your Merkle Tree class
+
+// Endpoint to get Merkle Tree data for the latest block
+app.get('/api/merkle-tree', (req, res) => {
+  const blockHashes = blockchain.chain.map(block => block.hash); // Get the hash of each block
+  
+  if (blockHashes.length === 0) {
+    return res.json({ message: 'No blocks available in the blockchain.' });
+  }
+
+  // Build Merkle Tree from block hashes
+  const merkleTree = new MerkleTree(blockHashes);
+  
+  // Return the Merkle Root and levels of the Merkle Tree
+  res.json({
+    merkleRoot: merkleTree.root,
+    levels: merkleTree.buildLevels() // Returns levels for visualization if needed
+  });
 });
 
 app.get('*', (req, res) => {
@@ -328,11 +406,14 @@ let PEER_PORT;
 
 if (process.env.GENERATE_PEER_PORT === 'true') {
   PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
+  VALIDATORS.push(wallet.publicKey);
+  console.log("VALIDATORS:",VALIDATORS);
+
 }
 
 const PORT = process.env.PORT || PEER_PORT || DEFAULT_PORT;
 app.listen(PORT, () => {
-  console.log(`listening at localhost:${PORT}`);
+  console.log(`listening at http://localhost:${PORT}/`);
 
   if (PORT !== DEFAULT_PORT) {
     syncWithRootState();

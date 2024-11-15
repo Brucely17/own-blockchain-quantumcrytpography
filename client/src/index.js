@@ -8,6 +8,7 @@ import ConductTransaction from './components/ConductTransaction';
 import TransactionPool from './components/TransactionPool';
 import LoginMain from './LoginBoxfile/LoginMain';
 import AccountData from './components/AccountData';
+import MerkleTreeVisualizer from './components/MerkleTreeVisualizer';
 import './index.css';
 
 render(
@@ -19,6 +20,7 @@ render(
       <Route path='/blocks' component={Blocks} />
       <Route path='/conduct-transaction' component={ConductTransaction} />
       <Route path='/transaction-pool' component={TransactionPool} />
+      <Route path="/merkletree" component={MerkleTreeVisualizer}/>
     </Switch>
   </Router>,
   document.getElementById('root')

@@ -34,10 +34,12 @@ class Transaction {
 
     if (!this.outputMap[recipient]) {
       this.outputMap[recipient] = amount;
-    } else {
-      this.outputMap[recipient] = this.outputMap[recipient] + amount;
-    }
-
+    } 
+      
+    this.outputMap[recipient] = recipient.balance + amount;
+      alert('Amount has been added to reciever');
+    
+    // this.outputMap[recipient] = this.outputMap[recipient] - amount;
     this.outputMap[senderWallet.publicKey] =
       this.outputMap[senderWallet.publicKey] - amount;
 
@@ -70,6 +72,6 @@ class Transaction {
       outputMap: { [minerWallet.publicKey]: MINING_REWARD }
     });
   }
-}
+};
 
 module.exports = Transaction;

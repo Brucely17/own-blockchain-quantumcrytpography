@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './AccountData.css';
 import { withRouter } from 'react-router-dom';
-const AccountData = () => {
+const AccountData = ({history}) => {
   const [formData, setFormData] = useState({
     accountNumber: '',
     name: '',
@@ -9,9 +9,6 @@ const AccountData = () => {
     phoneNumber: '',
     email:'',
     balance:0,
-   
-   
-   
   });
 
   const handleChange = (e) => {
@@ -30,7 +27,9 @@ const AccountData = () => {
     });
     const data = await response.json();
     console.log('Bank account created:', data);
-
+    // history.push(`/?username=${data.name}&accountNumber=${data.bankAccountId}`);
+    // history.push(`/?name=${formData.name}`);
+    history.push('/');
 
   };
 

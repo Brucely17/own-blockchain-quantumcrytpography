@@ -162,6 +162,10 @@ function LoginBox({history}) {
 
             history.push(`/bankaccount`);
           }
+          else if (data.bank.length!=0){
+            history.push(`/?name=${loginData.username}&accountNumber=${data.bank[0]}`);
+            // history.push('/')
+          }
         }
         
         

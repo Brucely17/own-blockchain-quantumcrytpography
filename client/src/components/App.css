@@ -1,0 +1,111 @@
+/* body {
+    background-color: #1d2b38;
+    color: #ffffff;
+  }
+  
+  .App {
+    padding: 20px;
+  }
+  
+  .logo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .WalletInfo {
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #2a3c4d;
+  }
+  
+  .WalletInfo div {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #000000;
+    color: #ffffff;
+  }
+  
+  button:hover {
+    background-color: #2a3c4d;
+    color: #ffffff;
+  }
+  
+  a {
+    color: #ffffff;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+   */
+   /* body {
+    background: linear-gradient(180deg, #f0f0f0, #e6e6e6); /* Gradient background */
+    /* color: #000000;
+    font-family: Arial, sans-serif;
+  } */
+  body {
+    background: linear-gradient(180deg, #f0f0f0, #e6e6e6); /* Gradient background */
+    color: #000000;
+    font-family: Roboto, sans-serif;
+  }
+  
+  .App {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .navbar > .ant-card {
+    margin: 0 10px;
+    width: 150px;
+    background: #007acc; /* Navigation button background color */
+    color: #ffffff;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 18px;
+    padding: 10px;
+  }
+  
+  .navbar > .ant-card:hover {
+    background: #005eaa; /* Navigation button background color on hover */
+  }
+  
+  .main-content {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+  
+  .logo-container {
+    background: #ffffff; /* Logo container background color */
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .WalletInfo {
+    background: #ffffff; /* Wallet info container background color */
+    padding: 20px;
+    border-radius: 10px;
+  }
+  

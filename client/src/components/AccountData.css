@@ -35,7 +35,8 @@
   .button:hover {
     background-color: #0056b3;
   } */
-  /* AccountData.css */
+
+  /* AccountData.css
 
 .container {
   max-width: 400px;
@@ -83,17 +84,17 @@ h2 {
 }
 
 /* Add background image or video styles */
-body {
+/* body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   /* Uncomment one of the following lines based on your preference */
   /* background-image: url('path/to/your-image.jpg'); */
   /* background-video: url('path/to/your-video.mp4'); */
-}
+/* } */
 
-/* Optional: Add animations */
-@keyframes fadeIn {
+/* Optional: Add animations  */
+/* @keyframes fadeIn {
   from {
     opacity: 0;
   }
@@ -104,4 +105,41 @@ body {
 
 .container {
   animation: fadeIn 1s;
+} */ 
+body {
+  background-color: #1d2b38;
+  color: #ffffff;
+}
+
+.form-group {
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #2a3c4d;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.input {
+  width: 50%;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.button {
+  width: 50%;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.button:hover {
+  background-color: #2a3c4d;
+  color: #ffffff;
 }
