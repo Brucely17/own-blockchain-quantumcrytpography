@@ -1,0 +1,69 @@
+.TransactionPool {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align:center;
+    padding: 20px;
+    min-height: 100vh;
+    background: var(--deep-black);
+    color: var(--white);
+  }
+  
+  .TransactionPool h3 {
+    font-size: 28px;
+    color: var(--bright-purple);
+    margin-bottom: 20px;
+  }
+  
+  .TransactionPool a {
+    color: var(--bright-purple);
+    text-decoration: none;
+    font-weight: bold;
+    margin-bottom: 20px;
+    transition: color 0.2s ease;
+  }
+  
+  .TransactionPool a:hover {
+    color: var(--muted-gray);
+  }
+  
+  .TransactionPool hr {
+    border: 1px solid var(--muted-gray);
+    width: 80%;
+    margin: 20px 0;
+  }
+  
+  .TransactionPool button {
+    background-color: var(--bright-purple);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    color: var(--white);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  
+  .TransactionPool button:hover {
+    background-color: var(--muted-gray);
+    transform: scale(1.05);
+  }
+  
+  .TransactionPool .Transaction {
+    width: 80%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--muted-gray);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    color: var(--white);
+    transition: transform 0.2s ease;
+  }
+  
+  .TransactionPool .Transaction:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.7);
+  }
+  

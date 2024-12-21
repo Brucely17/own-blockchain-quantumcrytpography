@@ -1,12 +1,10 @@
-<<<<<<< HEAD
 /* .container {
 =======
-<<<<<<< HEAD
+
 /* .container {
 =======
 .container {
 >>>>>>> origin/main
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -42,15 +40,14 @@
   
   .button:hover {
     background-color: #0056b3;
-<<<<<<< HEAD
+
   } */
 
   /* AccountData.css
 =======
-<<<<<<< HEAD
+
   } */
   /* AccountData.css */
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
 
 .container {
   max-width: 400px;
@@ -98,18 +95,17 @@ h2 {
 }
 
 /* Add background image or video styles */
-<<<<<<< HEAD
+
 /* body {
 =======
 body {
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   /* Uncomment one of the following lines based on your preference */
   /* background-image: url('path/to/your-image.jpg'); */
   /* background-video: url('path/to/your-video.mp4'); */
-<<<<<<< HEAD
+
 /* } */
 
 /* Optional: Add animations  */
@@ -119,7 +115,6 @@ body {
 
 /* Optional: Add animations */
 @keyframes fadeIn {
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
   from {
     opacity: 0;
   }
@@ -130,7 +125,7 @@ body {
 
 .container {
   animation: fadeIn 1s;
-<<<<<<< HEAD
+
 } */ 
 body {
   background-color: #1d2b38;
@@ -169,10 +164,6 @@ body {
   background-color: #2a3c4d;
   color: #ffffff;
 }
-=======
-}
-=======
-  }
+
   
->>>>>>> origin/main
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
+  

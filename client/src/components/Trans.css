@@ -1,0 +1,59 @@
+/* :root {
+    --muted-gray: #a9a8ac;
+    --bright-purple: #9a5fe5;
+    --white: #ffffff;
+    --deep-black: #0e0c15;
+  } */
+  .transtop{
+    display:flex;
+    flex-direction: column;
+    justify-content:center;
+  }
+  .Transaction {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    width:1200px;
+    background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+    border: 1px solid var(--muted-gray);
+    border-radius: 10px;
+    color: var(--white);
+    padding: 20px;
+    margin: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .Transaction:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.7);
+  }
+  
+  .Transaction div {
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .Transaction div:first-child {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: var(--bright-purple);
+  }
+  
+  .Transaction div:last-child {
+    font-size: 14px;
+    color: var(--muted-gray);
+  }
+  
+  .Transaction .recipient {
+    color: var(--bright-purple);
+    font-weight: bold;
+  }
+  
+  .Transaction .balance {
+    color: var(--muted-gray);
+    font-size: 14px;
+  }
+  

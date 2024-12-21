@@ -83,7 +83,7 @@ class Block {
 
     do {
       nonce++;
-      // timestamp = '';
+      timestamp = Date.now();
       difficulty = Block.adjustDifficulty({ originalBlock: lastBlock, timestamp });
       // Include the Merkle Root in the hash calculation
       hash = cryptoHash(timestamp, lastHash,  nonce, difficulty);

@@ -1,0 +1,46 @@
+.Block {
+    background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+    border: 1px solid var(--muted-gray); /* Border matches muted theme */
+    border-radius: 10px; /* Rounded corners for smooth appearance */
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+    color: var(--white); /* Text color aligns with theme */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .Block:hover {
+    transform: scale(1.02); /* Slight scaling effect on hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.7); /* Enhanced shadow on hover */
+  }
+  
+  .Block div {
+    margin-bottom: 10px; /* Spacing between block details */
+    font-size: 16px; /* Readable font size */
+  }
+  
+  .Block button {
+    background-color: var(--bright-purple); /* Bright button for visibility */
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: var(--white);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  
+  .Block button:hover {
+    background-color: var(--muted-gray); /* Subtle color change on hover */
+    transform: scale(1.05);
+  }
+  
+  .Block hr {
+    border: 1px solid var(--muted-gray); /* Light separator line */
+    margin: 15px 0;
+  }
+  
+  .Block .Transaction {
+    margin: 10px 0;
+  }
+  

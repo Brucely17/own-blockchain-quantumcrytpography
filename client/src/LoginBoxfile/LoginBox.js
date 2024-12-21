@@ -159,16 +159,13 @@ function LoginBox({history}) {
         if (data.status==true){
           console.log('yes its true')
           if (data.bank.length==0){
-<<<<<<< HEAD
 
             history.push(`/bankaccount`);
           }
           else if (data.bank.length!=0){
             history.push(`/?name=${loginData.username}&accountNumber=${data.bank[0]}`);
             // history.push('/')
-=======
             history.push('/bankaccount');
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
           }
         }
         

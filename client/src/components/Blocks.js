@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import  './Blocks.css';
 import Block from './Block';
 
 class Blocks extends Component {
@@ -25,7 +26,7 @@ class Blocks extends Component {
 
     return (
       <div>
-        <div><Link to='/'>Home</Link></div>
+        <h3><Link to='/'>Home</Link></h3>
         <h3>Blocks</h3>
         <div>
           {

@@ -8,10 +8,9 @@ import ConductTransaction from './components/ConductTransaction';
 import TransactionPool from './components/TransactionPool';
 import LoginMain from './LoginBoxfile/LoginMain';
 import AccountData from './components/AccountData';
-<<<<<<< HEAD
+
 import MerkleTreeVisualizer from './components/MerkleTreeVisualizer';
-=======
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
+
 import './index.css';
 
 render(

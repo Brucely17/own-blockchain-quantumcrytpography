@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { FormGroup, FormControl, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import history from '../history';
+import './Transaction.css';
 
 class ConductTransaction extends Component {
   state = { recipient: '', amount: 0, knownAddresses: [] };
@@ -44,13 +45,14 @@ class ConductTransaction extends Component {
         {
           this.state.knownAddresses.map(knownAddress => {
             return (
-              <div key={knownAddress}>
+              <div key={knownAddress} className="known-address">
                 <div>{knownAddress}</div>
                 <br />
               </div>
             )
           })
         }
+        <div className='form-grp'>
         <FormGroup>
           <FormControl
             input='text'
@@ -74,6 +76,7 @@ class ConductTransaction extends Component {
           >
             Submit
           </Button>
+        </div>
         </div>
       </div>
     )

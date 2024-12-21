@@ -81,102 +81,145 @@
 // export default App;
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Modal, Card } from 'antd';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo-removebg-preview.png';
 import ClipBoardCopy from './ClipBoardCopy';
-import AccountData from './AccountData';
+import "./App.css"
 
 class App extends Component {
-  state = { walletInfo: {}, selectedLink: null, modalVisible: false };
+  state = { walletInfo: {}, selectedLink: null };
 
   componentDidMount() {
     fetch(`${document.location.origin}/api/wallet-info`)
-      .then(response => response.json())
-      .then(json => this.setState({ walletInfo: json }));
+      .then((response) => response.json())
+      .then((json) => this.setState({ walletInfo: json }));
   }
-
-  openModal = (selectedLink) => {
-    this.setState({ selectedLink, modalVisible: true });
-  };
-
-  closeModal = () => {
-    this.setState({ modalVisible: false });
-  };
 
   render() {
     const { address, balance } = this.state.walletInfo;
-    const { selectedLink, modalVisible } = this.state;
-
+    
     const cardLinks = [
-      { title: 'Create Account', to: '/bankaccount' },
       { title: 'Blocks', to: '/blocks' },
-      {title:"MerkleTree",to:"/merkletree"},
+      { title: 'MerkleTree', to: '/merkletree' },
       { title: 'Conduct a Transaction', to: '/conduct-transaction' },
       { title: 'Transaction Pool', to: '/transaction-pool' },
-      { title: 'Login', to: '/login' },
     ];
 
     return (
       <div className="App">
-        <img className="logo" src={logo} alt="logo" />
+        <>
+          <img src={logo} alt="Logo" style={{ width: '100px' }} />
+          <h1 style={{color:"aliceblue"}}>Blockchain App</h1>
         
-<<<<<<< HEAD
+          </>
         <div className="card-container">
           {cardLinks.map((link, index) => (
-            <Card
-              key={index}
-              title={link.title}
-              onClick={() => this.openModal(link)}
-              style={{ width: 300, margin: '10px', cursor: 'pointer' }}
-            >
-              <Link to={link.to}>Details</Link>
-            </Card>
+            <Link to={link.to} className="card-link">
+            <div key={index} className="custom-card">
+              <h3>{link.title}</h3>
+
+              
+            </div>
+            </Link>
           ))}
         </div>
 
-=======
-        
-        <div>Welcome to the blockchain...</div>
-        <br />
-<<<<<<< HEAD
-        <button><Link to ='/bankaccount'>Create Account</Link></button>
-=======
-        <AccountData/>
->>>>>>> origin/main
-        <div><Link to='/blocks'>Blocks</Link></div>
-        <div><Link to='/conduct-transaction'>Conduct a Transaction</Link></div>
-        <div><Link to='/transaction-pool'>Transaction Pool</Link></div>
-        <button><Link to ='/login'> Login</Link></button>
-        <br />
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
-        <div className='WalletInfo'>
-        <>
-          <div>Address: {address}</div>
-
+        <div className="WalletInfo">
+          <h3>Wallet Info</h3>
+          <h4 style={{color:"grey"}}>Address: {address}</h4>
           <ClipBoardCopy text={address} />
-        </>
-          <div>Balance: {balance}</div>
+          <h4 style={{color:"grey"}}>Balance: {balance}</h4>
         </div>
-
-        <Modal
-          title={selectedLink ? selectedLink.title : ''}
-          visible={modalVisible}
-          onCancel={this.closeModal}
-        >
-          {selectedLink && (
-            <div>
-              You selected: <strong>{selectedLink.title}</strong>
-              
-              
-            </div>
-          )}
-        </Modal>
       </div>
     );
   }
 }
 
 export default App;
+
+
+// import React, { Component } from 'react';
+// import { Link } from 'react-router-dom';
+// import { Modal, Card } from 'antd';
+// import logo from '../assets/logo.png';
+// import ClipBoardCopy from './ClipBoardCopy';
+// import AccountData from './AccountData';
+
+// class App extends Component {
+//   state = { walletInfo: {}, selectedLink: null, modalVisible: false };
+
+//   componentDidMount() {
+//     fetch(`${document.location.origin}/api/wallet-info`)
+//       .then(response => response.json())
+//       .then(json => this.setState({ walletInfo: json }));
+//   }
+
+//   openModal = (selectedLink) => {
+//     this.setState({ selectedLink, modalVisible: true });
+//   };
+
+//   closeModal = () => {
+//     this.setState({ modalVisible: false });
+//   };
+
+//   render() {
+//     const { address, balance } = this.state.walletInfo;
+//     const { selectedLink, modalVisible } = this.state;
+
+//     const cardLinks = [
+//       // { title: 'Create Account', to: '/bankaccount' },
+//       { title: 'Blocks', to: '/blocks' },
+//       {title:"MerkleTree",to:"/merkletree"},
+//       { title: 'Conduct a Transaction', to: '/conduct-transaction' },
+//       { title: 'Transaction Pool', to: '/transaction-pool' },
+//       // { title: 'Login', to: '/login' },
+//     ];
+
+//     return (
+//       <div className="App">
+        
+//         <div className="card-container">
+//           {cardLinks.map((link, index) => (
+//             <Card
+//               key={index}
+//               title={link.title}
+//               onClick={() => this.openModal(link)}
+//               style={{ width: 300, margin: '10px', cursor: 'pointer' }}
+//             >
+//               <Link to={link.to}>Details</Link>
+//             </Card>
+//           ))}
+//         </div>
+
+        
+        
+//         <div className='WalletInfo'>
+//         <>
+//           <div>Address: {address}</div>
+
+//           <ClipBoardCopy text={address} />
+//         </>
+//           <div>Balance: {balance}</div>
+//         </div>
+
+//         <Modal
+//           title={selectedLink ? selectedLink.title : ''}
+//           visible={modalVisible}
+//           onCancel={this.closeModal}
+//         >
+//           {selectedLink && (
+//             <div>
+//               You selected: <strong>{selectedLink.title}</strong>
+              
+              
+//             </div>
+//           )}
+//         </Modal>
+//       </div>
+//     );
+//   }
+// }
+
+// export default App;
 // import React, { Component } from 'react';
 // import { Modal, Card } from 'antd';
 // import logo from '../assets/logo.png';

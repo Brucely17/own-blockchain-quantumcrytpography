@@ -9,12 +9,9 @@ const AccountData = ({history}) => {
     phoneNumber: '',
     email:'',
     balance:0,
-<<<<<<< HEAD
-=======
    
    
    
->>>>>>> 151f5aa205b7a3a77b32b69d432fd2d8543d4f83
   });
 
   const handleChange = (e) => {

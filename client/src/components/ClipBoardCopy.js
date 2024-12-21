@@ -1,5 +1,6 @@
 import React from 'react';
 import clipboardCopy from 'clipboard-copy';
+import './clip.css';
 
 const ClipBoardCopy = ({ text }) => {
   const handleCopyClick = () => {
@@ -7,7 +8,7 @@ const ClipBoardCopy = ({ text }) => {
   };
 
   return (
-    <div>
+    <div className='clip'>
       <button onClick={handleCopyClick}>Copy to Clipboard</button>
     </div>
   );
