@@ -1,6 +1,7 @@
 const PubNub = require('pubnub');
 
 const credentials = {
+  // karna
   // publishKey: 'pub-c-ce2e6a01-0dd0-4b1d-a63d-d97f66f33609',
   // subscribeKey: 'sub-c-2f195dcd-8434-4696-8852-59ad66e8b06d',
   // secretKey: 'sec-c-NTg3MWIyZTItOWI5Yi00YTIxLWI3N2MtMmI3ZDg3ZGRkMzVk'
