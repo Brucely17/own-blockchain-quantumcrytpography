@@ -35,12 +35,14 @@ const wallet =new Wallet();
 const pubsub = new PubSub({ blockchain, transactionPool });
 const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wallet, pubsub });
 
+const USERS=["Farmer1","Farmer2","FoodInspector1"];
+const validating_blocks={};
+
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
 
-
-
+let PEER_PORT;
 
 //signup -------- login
 
@@ -242,8 +244,9 @@ res.json(wallet);
 app.get('/api/blocks/:id', (req, res) => {
   const { id } = req.params;
   const { length } = blockchain.chain;
-
-  const blocksReversed = blockchain.chain.slice().reverse();
+  console.log("blockchain:",blockchain.chain.chain);
+  
+  const blocksReversed = blockchain.chain.chain.slice().reverse();
 
   let startIndex = (id-1) * 5;
   let endIndex = id * 5;
@@ -252,17 +255,10 @@ app.get('/api/blocks/:id', (req, res) => {
   endIndex = endIndex < length ? endIndex : length;
 
   res.json(blocksReversed.slice(startIndex, endIndex));
+  
+ 
 });
 
-app.post('/api/mine', (req, res) => {
-  const { data } = req.body;
-
-  blockchain.addBlock({ data });
-
-  pubsub.broadcastChain();
-
-  res.redirect('/api/blocks');
-});
 
 app.post('/api/transact', (req, res) => {
   const { amount, recipient } = req.body;
@@ -292,11 +288,45 @@ app.post('/api/transact', (req, res) => {
 });
 
 app.get('/api/transaction-pool-map', (req, res) => {
+  if (VALIDATORS.includes(PEER_PORT)){
   res.json(transactionPool.transactionMap);
+  }
+  else{
+    res.json({});
+  }
 });
 
 app.get('/api/mine-transactions', (req, res) => {
-  transactionMiner.mineTransactions();
+  // transactionMiner.mineTransactions();
+  const validTransactions = transactionPool.validTransactions();
+
+    // validTransactions.push(
+
+    //   Transaction.rewardTransaction({ minerWallet: this.wallet })
+      
+    // );
+
+    blockchain.addBlock({ data: validTransactions });
+    console.log("ValidTrans:",validTransactions.signature,validating_blocks);
+    if(validTransactions[0].id in validating_blocks){
+      validating_blocks[validTransactions.signature] +=1;
+    }
+    else{
+      validating_blocks[validTransactions.signature] = 1;
+    }
+    console.log("ValidTrans:",validTransactions.signature,validating_blocks);
+
+    if (validating_blocks[validTransactions.signature]>=1){
+      pubsub.broadcastChain();
+
+    transactionPool.clear();
+    }
+
+    
+
+    // pubsub.broadcastChain();
+
+    // transactionPool.clear();
   
 
   res.redirect('/api/blocks');
@@ -401,51 +431,55 @@ const syncWithRootState = () => {
   });
 };
 
-if (isDevelopment) {
-  const walletFoo = new Wallet();
-  const walletBar = new Wallet();
+// if (isDevelopment) {
+//   const walletFoo = new Wallet();
+//   const walletBar = new Wallet();
 
-  const generateWalletTransaction = ({ wallet, recipient, amount }) => {
-    const transaction = wallet.createTransaction({
-      recipient, amount, chain: blockchain.chain
-    });
+//   const generateWalletTransaction = ({ wallet, recipient, amount }) => {
+//     const transaction = wallet.createTransaction({
+//       recipient, amount, chain: blockchain.chain
+//     });
 
-    transactionPool.setTransaction(transaction);
-  };
+//     transactionPool.setTransaction(transaction);
+//   };
 
-  const walletAction = () => generateWalletTransaction({
-    wallet, recipient: walletFoo.publicKey, amount: 5
-  });
+//   const walletAction = () => generateWalletTransaction({
+//     wallet, recipient: walletFoo.publicKey, amount: 5
+//   });
 
-  const walletFooAction = () => generateWalletTransaction({
-    wallet: walletFoo, recipient: walletBar.publicKey, amount: 10
-  });
+//   const walletFooAction = () => generateWalletTransaction({
+//     wallet: walletFoo, recipient: walletBar.publicKey, amount: 10
+//   });
 
-  const walletBarAction = () => generateWalletTransaction({
-    wallet: walletBar, recipient: wallet.publicKey, amount: 15
-  });
+//   const walletBarAction = () => generateWalletTransaction({
+//     wallet: walletBar, recipient: wallet.publicKey, amount: 15
+//   });
 
-  for (let i=0; i<10; i++) {
-    if (i%3 === 0) {
-      walletAction();
-      walletFooAction();
-    } else if (i%3 === 1) {
-      walletAction();
-      walletBarAction();
-    } else {
-      walletFooAction();
-      walletBarAction();
-    }
+//   for (let i=0; i<10; i++) {
+//     if (i%3 === 0) {
+//       walletAction();
+//       walletFooAction();
+//     } else if (i%3 === 1) {
+//       walletAction();
+//       walletBarAction();
+//     } else {
+//       walletFooAction();
+//       walletBarAction();
+//     }
 
-    transactionMiner.mineTransactions();
-  }
-}
+//     transactionMiner.mineTransactions();
+//   }
+// }
 
-let PEER_PORT;
+// let PEER_PORT;
 
 if (process.env.GENERATE_PEER_PORT === 'true') {
   PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
-  VALIDATORS.push(wallet.publicKey);
+  if (USERS.includes(process.env.user)){
+    
+  VALIDATORS.push(PEER_PORT);
+  }
+ 
   console.log("VALIDATORS:",VALIDATORS);
 
 }

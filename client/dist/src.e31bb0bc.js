@@ -50088,7 +50088,69 @@ function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new T
 function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); } // import React, { Component } from 'react';
+// import { Button } from 'react-bootstrap';
+// import Transaction from './Transaction';
+// import { Link } from 'react-router-dom';
+// import history from '../history';
+// import './TransactionPool.css';
+// const POLL_INTERVAL_MS = 10000;
+// class TransactionPool extends Component {
+//   state = { transactionPoolMap: {} };
+//   fetchTransactionPoolMap = () => {
+//     fetch(`${document.location.origin}/api/transaction-pool-map`)
+//       .then(response => response.json())
+//       .then(json => this.setState({ transactionPoolMap: json }));
+//   }
+//   fetchMineTransactions = () => {
+//     fetch(`${document.location.origin}/api/mine-transactions`)
+//       .then(response => {
+//         if (response.status === 200) {
+//           alert('success');
+//           history.push('/blocks');
+//         } else {
+//           alert('The mine-transactions block request did not complete.');
+//         }
+//       })
+//   }
+//   componentDidMount() {
+//     this.fetchTransactionPoolMap();
+//     this.fetchPoolMapInterval = setInterval(
+//       () => this.fetchTransactionPoolMap(),
+//       POLL_INTERVAL_MS
+//     );
+//   }
+//   componentWillUnmount() {
+//     clearInterval(this.fetchPoolMapInterval);
+//   }
+//   render() {
+//     return (
+//       <div className='TransactionPool'>
+//         <h3><Link to='/'>Home</Link></h3>
+//         <h3>Transaction Pool</h3>
+//         {
+//           Object.values(this.state.transactionPoolMap).map(transaction => {
+//             return (
+//               <div key={transaction.id}>
+//                 <hr />
+//                 <Transaction transaction={transaction} />
+//               </div>
+//             )
+//           })
+//         }
+//         <hr />
+//         {this.state.transactionPoolMap
+//         <Button
+//           bsStyle="danger"
+//           onClick={this.fetchMineTransactions}
+//         >
+//           Mine the transactions
+//         </Button>}
+//       </div>
+//     );
+//   }
+// }
+// export default TransactionPool;
 var POLL_INTERVAL_MS = 10000;
 var TransactionPool = /*#__PURE__*/function (_Component) {
   function TransactionPool() {
@@ -50140,17 +50202,19 @@ var TransactionPool = /*#__PURE__*/function (_Component) {
   }, {
     key: "render",
     value: function render() {
+      var transactionPoolMap = this.state.transactionPoolMap;
+      var isTransactionPoolEmpty = Object.keys(transactionPoolMap).length === 0;
       return /*#__PURE__*/_react.default.createElement("div", {
         className: "TransactionPool"
       }, /*#__PURE__*/_react.default.createElement("h3", null, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
         to: "/"
-      }, "Home")), /*#__PURE__*/_react.default.createElement("h3", null, "Transaction Pool"), Object.values(this.state.transactionPoolMap).map(function (transaction) {
+      }, "Home")), /*#__PURE__*/_react.default.createElement("h3", null, "Transaction Pool"), Object.values(transactionPoolMap).map(function (transaction) {
         return /*#__PURE__*/_react.default.createElement("div", {
           key: transaction.id
         }, /*#__PURE__*/_react.default.createElement("hr", null), /*#__PURE__*/_react.default.createElement(_Transaction.default, {
           transaction: transaction
         }));
-      }), /*#__PURE__*/_react.default.createElement("hr", null), /*#__PURE__*/_react.default.createElement(_reactBootstrap.Button, {
+      }), /*#__PURE__*/_react.default.createElement("hr", null), !isTransactionPoolEmpty && /*#__PURE__*/_react.default.createElement(_reactBootstrap.Button, {
         bsStyle: "danger",
         onClick: this.fetchMineTransactions
       }, "Mine the transactions"));
@@ -61953,7 +62017,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38843" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56737" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

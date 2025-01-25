@@ -7,7 +7,7 @@
     "test": "jest --watchAll",
     "start": "npm run build-client & node index.js",
     "dev": "npm run dev-client & cross-env ENV='development' nodemon index.js",
-    "dev-peer": "cross-env GENERATE_PEER_PORT='true' ENV='development' nodemon index.js",
+    "dev-peer": "cross-env GENERATE_PEER_PORT='true'  ENV='development' USER=$npm_config_user  nodemon index.js",
     "build-client": "npm run clean && parcel build client/src/index.html --out-dir client/dist",
     "dev-client": "npm run clean && parcel client/src/index.html --out-dir client/dist",
     "clean": "rimraf .cache client/dist"
@@ -24,7 +24,6 @@
     "nodemon": "^1.18.4"
   },
   "dependencies": {
-
     "@chainsafe/libp2p-noise": "^16.0.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
