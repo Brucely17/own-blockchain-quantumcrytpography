@@ -1,0 +1,288 @@
+/* @font-face {
+  font-family: 'Terminus';
+  src: url('path/to/terminus.woff2') format('woff2'),
+       url('path/to/terminus.woff') format('woff');
+  /* Add additional font formats and paths as needed */
+
+.crypt {
+  text-align: center;
+  font-family:Terminus;
+  height:100vh;
+}
+
+.crypt-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .crypt-logo {
+    animation: crypt-logo-spin infinite 20s linear;
+  }
+}
+
+.crypt-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.crypt-link {
+  color: #61dafb;
+}
+
+@keyframes crypt-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.bg {
+  animation: slide 3s ease-in-out infinite alternate;
+  background-image: linear-gradient(-60deg, #6c3 50%, #09f 50%);
+  bottom: 0;
+  /* left: -50%; */
+  opacity: 0.5;
+  position: fixed;
+  /* right: -50%; */
+  top: 0;
+  z-index: -1;
+}
+
+.bg2 {
+  animation-direction: alternate-reverse;
+  animation-duration: 4s;
+}
+
+.bg3 {
+  animation-duration: 5s;
+}
+
+.content {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 0.25em;
+  box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  left: 50%;
+  padding: 10vmin;
+  position: fixed;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+h1 {
+  font-family: Terminus;
+}
+h2{
+  font-family:'Terminus',monospace;
+  font-weight:30;
+}
+.account{
+
+}
+@keyframes slide {
+  0% {
+    transform: translateX(-25%);
+  }
+  100% {
+    transform: translateX(25%);
+  }
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+body {
+  height: 100%;
+}
+.str{
+color:#3498db;
+}
+header {
+  text-align: center;
+  width: 100%;
+  height: auto;
+  background-size: cover;
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 85% 85% / 30%;
+}
+header .overlay {
+  width: 100%;
+  height: 100%;
+  padding: 50px;
+  color: #fff;
+  text-shadow: 1px 1px 1px #333;
+  background-image: linear-gradient(135deg, #9f05ff69 10%, #fd5e086b 100%);
+}
+
+h1 {
+  font-family: 'Terminus',monospace;
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+
+h3,
+p {
+  /* font-family: "Open Sans", sans-serif;
+  margin-bottom: 30px; */
+
+  font-family: 'Terminus', monospace; /* Assuming Terminus is your preferred monospaced font */
+  background-color: #2c3e50; /* Dark background color */
+  color: #ecf0f1; /* Light text color */
+  border: 2px solid #3498db; /* Border color */
+  border-radius: 8px; /* Rounded corners */
+  padding: 10px; /* Padding for content */
+  box-shadow: 0 0 10px rgba(52, 73, 94, 0.5); /* Box shadow for illumination effect */
+  transition: box-shadow 0.3s; /* Smooth transition for box shadow */
+  margin-left:200px;
+  margin-right:200px;
+  
+}
+
+p:hover {
+  box-shadow: 0 0 20px rgba(52, 73, 94, 0.8); /* Increased box shadow on hover */
+}
+
+.share {
+  padding: 16px;
+  margin-top: 10px;
+  vertical-align: center;
+  background: blue;
+  width: 70px;
+  height: 45px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  z-index: -1;
+}
+
+.share:hover {
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24),
+    0 17px 50px 0 rgba(0, 0, 0, 0.19);
+}
+input[type="text"]:focus {
+  background-color: lightblue;
+}
+/* Dark Theme Styles */
+.crypt input[type="text"] {
+  background-color: #34495e; /* Darker background color */
+  color: #ecf0f1; /* Light text color */
+  border: 2px solid #3498db; /* Border color */
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.crypt input[type="text"]:focus {
+  background-color: #2c3e50; /* Darker background color on focus */
+  border-color: #2980b9; /* Darker border color on focus */
+  box-shadow: 0 0 10px rgba(52, 73, 94, 0.5); /* Box shadow on focus */
+}
+
+.crypt input[type="text"]:hover {
+  border-color: #2980b9; /* Darker border color on hover */
+}
+
+/* .crypt {
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  backdrop-filter: blur(10px);
+  padding-left:0px;
+}
+
+.crypt-header {
+  background-color: #1a1a1a;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(14px + 2vmin);
+  color: #ffffff;
+  position: relative;
+}
+
+h1 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 2em;
+  margin-bottom: 1em;
+  color: #ffffff;
+}
+
+h3,
+p {
+  font-family: 'Open Sans', sans-serif;
+  margin-bottom: 1em;
+  color: #dbe4f3;
+}
+
+.share {
+  padding: 16px;
+  margin-top: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.share:hover {
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+/* Illuminating effect */
+/* .crypt::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+  opacity: 0.5;
+  z-index: -1;
+} */
+
+/* Glass morphism effect for input */
+/* input[type="text"] {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 10px;
+  transition: background-color 0.3s, box-shadow 0.3s, border 0.3s;
+} */
+
+/* input[type="text"]:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}  */

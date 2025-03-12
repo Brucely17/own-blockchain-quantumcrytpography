@@ -1,0 +1,55 @@
+.image-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 20px; /* Increased grid gap for better spacing */
+  grid-auto-rows: 350px;
+  margin: 20px; /* Increased margin for better spacing */
+}
+
+.image-list img {
+  width: 50%;
+  height: 50%;
+}
+
+.center {
+  margin: 60px; /* Increased margin for better spacing */
+}
+
+.button {
+  border-radius: 8px; /* Slightly increased border radius */
+  padding: 8px 20px 10px; 
+  border: none;
+  font-size: 15px; /* Slightly increased font size */
+  font-weight: bold; /* Added bold font weight for emphasis */
+  margin-right: 15px; /* Adjusted margin for better spacing */
+  padding-bottom: 15px; /* Increased padding for a more comfortable button */
+}
+
+.button-1 {
+  background-color: transparent;
+  border: 3px solid #00bfff;
+  border-radius: 50px;
+  -webkit-transition: all 0.15s ease-in-out;
+  transition: all 0.15s ease-in-out;
+  color: #00bfff;
+  font-weight: bold; /* Added bold font weight for emphasis */
+}
+
+.button-1:hover {
+  box-shadow: 0 0 10px 0 #00bfff inset, 0 0 20px 2px #00bfff;
+  border: 3px solid #00bfff;
+}
+
+.address {
+  display: block;
+  margin: auto;
+  height: 40px; /* Adjusted height for better spacing */
+  width: 330px;
+  text-align: center;
+  font-size: 16px; /* Adjusted font size for better readability */
+}
+
+input[type="text"]:focus {
+  background-color: #4fa3ff; /* Adjusted background color on focus */
+  color: #1a1a1a; /* Dark text color */
+}

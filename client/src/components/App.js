@@ -39,7 +39,7 @@
 
 // export default App;
 // import React, { Component,useState } from 'react';
-// import { Modal, Card } from 'antd';
+// import { Modal, bard } from 'antd';
 // import { Link } from 'react-router-dom';
 // import logo from '../assets/logo.png';
 // import AccountData from './AccountData' 
@@ -93,15 +93,17 @@ class App extends Component {
       .then((response) => response.json())
       .then((json) => this.setState({ walletInfo: json }));
   }
+  
 
   render() {
     const { address, balance } = this.state.walletInfo;
     
-    const cardLinks = [
+    const bardLinks = [
       { title: 'Blocks', to: '/blocks' },
       { title: 'MerkleTree', to: '/merkletree' },
       { title: 'Conduct a Transaction', to: '/conduct-transaction' },
       { title: 'Transaction Pool', to: '/transaction-pool' },
+      {title:"FileSystem",to:"/filesys"}
     ];
 
     return (
@@ -111,10 +113,10 @@ class App extends Component {
           <h1 style={{color:"aliceblue"}}>Blockchain App</h1>
         
           </>
-        <div className="card-container">
-          {cardLinks.map((link, index) => (
-            <Link to={link.to} className="card-link">
-            <div key={index} className="custom-card">
+        <div className="bard-container">
+          {bardLinks.map((link, index) => (
+            <Link to={link.to} className="bard-link">
+            <div key={index} className="custom-bard">
               <h3>{link.title}</h3>
 
               
@@ -139,7 +141,7 @@ export default App;
 
 // import React, { Component } from 'react';
 // import { Link } from 'react-router-dom';
-// import { Modal, Card } from 'antd';
+// import { Modal, bard } from 'antd';
 // import logo from '../assets/logo.png';
 // import ClipBoardCopy from './ClipBoardCopy';
 // import AccountData from './AccountData';
@@ -165,7 +167,7 @@ export default App;
 //     const { address, balance } = this.state.walletInfo;
 //     const { selectedLink, modalVisible } = this.state;
 
-//     const cardLinks = [
+//     const bardLinks = [
 //       // { title: 'Create Account', to: '/bankaccount' },
 //       { title: 'Blocks', to: '/blocks' },
 //       {title:"MerkleTree",to:"/merkletree"},
@@ -177,16 +179,16 @@ export default App;
 //     return (
 //       <div className="App">
         
-//         <div className="card-container">
-//           {cardLinks.map((link, index) => (
-//             <Card
+//         <div className="bard-container">
+//           {bardLinks.map((link, index) => (
+//             <bard
 //               key={index}
 //               title={link.title}
 //               onClick={() => this.openModal(link)}
 //               style={{ width: 300, margin: '10px', cursor: 'pointer' }}
 //             >
 //               <Link to={link.to}>Details</Link>
-//             </Card>
+//             </bard>
 //           ))}
 //         </div>
 
@@ -221,7 +223,7 @@ export default App;
 
 // export default App;
 // import React, { Component } from 'react';
-// import { Modal, Card } from 'antd';
+// import { Modal, bard } from 'antd';
 // import logo from '../assets/logo.png';
 // import AccountData from './AccountData';
 // import Blocks from './Blocks'
@@ -292,9 +294,9 @@ export default App;
 //         <br />
 //         <div>Welcome to the blockchain...</div>
 //         <br />
-//         <div className="component-cards">
+//         <div className="component-bards">
 //           {components.map((component, index) => (
-//             <Card
+//             <bard
 //               key={index}
 //               title={component.title}
 //               onClick={() => this.openModal(component)}
@@ -302,7 +304,7 @@ export default App;
 //             >
 
 //               Preview
-//             </Card>
+//             </bard>
 //           ))}
 //         </div>
 

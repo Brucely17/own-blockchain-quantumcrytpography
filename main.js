@@ -1,37 +1,44 @@
-class RandomInitializer {
-    constructor(valuesArray) {
-      // Shuffle the valuesArray to ensure randomness
-      this.shuffledArray = this.shuffleArray(valuesArray);
-      this.currentIndex = 0;
-    }
-  
-    getNextRandomValue() {
-      if (this.currentIndex >= this.shuffledArray.length) {
-        // If we've used all the values, reshuffle the array
-        this.shuffledArray = this.shuffleArray(this.shuffledArray);
-        this.currentIndex = 0;
-      }
-      return this.shuffledArray[this.currentIndex++];
-    }
+const fs = require('fs');
+const csv = require('csv-parser');
+const stream = require('stream');
+const { promisify } = require('util');
 
-    // Shuffle the input array
-    shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
+const pipeline = promisify(stream.pipeline);
+
+async function downloadAndProcessCSV(url) {
+    try {
+        // Fetch the CSV file
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch CSV: ${response.statusText}`);
+        }
+
+        // Create a writable stream to save the CSV data
+        const writableStream = fs.createWriteStream('temp.csv');
+
+        // Pipe the response body to the writable stream
+        await pipeline(response.body, writableStream);
+
+        console.log('CSV file downloaded successfully.');
+
+        // Read and process the CSV file
+        const results = [];
+        fs.createReadStream('temp.csv')
+            .pipe(csv())
+            .on('data', (data) => results.push(data))
+            .on('end', () => {
+                console.log('CSV data processed successfully.');
+                console.log(results); // Output the parsed CSV data
+                // You can now work with the `results` array
+            });
+
+    } catch (error) {
+        console.error('Error downloading or processing the CSV file:', error);
     }
-  }
-  
-  const values = [1, 2, 3, 4, 5]; // Replace with your values array
-  const randomInitializer = new RandomInitializer(values);
-  
-  // Use getNextRandomValue to get a random value
-  console.log(randomInitializer.getNextRandomValue());
-  console.log(randomInitializer.getNextRandomValue());
-  console.log(randomInitializer.getNextRandomValue());
-  console.log(randomInitializer.getNextRandomValue());
-  console.log(randomInitializer.getNextRandomValue());
-//   console.log(randomInitializer.getNextRandomValue());
-   
+}
+
+// Replace with your IPFS link
+const ipfsLink = 'https://gateway.pinata.cloud/ipfs/QmQsAaVbeQSnZk26iTTQ85JyRNJ16Es1rSeiRXxNASs2pX';
+
+downloadAndProcessCSV(ipfsLink);

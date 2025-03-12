@@ -12,6 +12,7 @@ import AccountData from './components/AccountData';
 import MerkleTreeVisualizer from './components/MerkleTreeVisualizer';
 
 import './index.css';
+import CryptoFileSystem from './src/CryptoFileSytem';
 
 render(
   <Router history={history}>
@@ -23,6 +24,7 @@ render(
       <Route path='/conduct-transaction' component={ConductTransaction} />
       <Route path='/transaction-pool' component={TransactionPool} />
       <Route path="/merkletree" component={MerkleTreeVisualizer}/>
+      <Route path='/filesys' component={CryptoFileSystem}/>
     </Switch>
   </Router>,
   document.getElementById('root')

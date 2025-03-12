@@ -1,0 +1,59 @@
+.top {
+  margin: 40px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.choose {
+  background-color:#3498db ;
+  /* background-image: linear-gradient(-180deg, #5aff15, #00b712); */
+  border: none;
+  border-radius: 6px;
+ 
+  padding: 10px 20px; /* Adjusted padding for better spacing */
+  margin-right: 10px;
+  cursor: pointer;
+  transition: box-shadow 0.3s, background-color 0.3s, filter 0.3s; /* Added filter transition for illuminating effect */
+}
+
+.choose:hover {
+  box-shadow: 0 0 15px rgba(75, 192, 192, 0.5); /* Dark theme-based shadow on hover */
+  background-color: #4caf50; /* New background color on hover */
+  filter: brightness(1.2); /* Illuminating effect on hover */
+}
+
+.textArea {
+  color: white;
+  font-family: 'Terminus', monospace;
+}
+
+.upload {
+  border: 1px solid #3498db;
+  background-color:#3498db;
+  color: #ffffff;
+  padding: 10px 20px; /* Adjusted padding for better spacing */
+  border-radius: 6px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s, filter 0.3s;
+}
+
+.upload:hover {
+  border: 1px solid #13aa52;
+  background-color: #2ecc71; /* New background color on hover */
+  color: #ffffff;
+  filter: brightness(1.2); /* Illuminating effect on hover */
+}
+
+.upload:disabled,
+.upload[disabled] {
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+}
+
+div {
+  padding: 10px 20px; /* Adjusted padding for better spacing */
+}
