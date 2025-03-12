@@ -1,5 +1,5 @@
 const hexToBinary = require('hex-to-binary');
-const { GENESIS_DATA, MINE_RATE } = require('../config');
+const { GENESIS_DATA, MINE_RATE, AI_NEEDS_REVIEW_THRESHOLD } = require('../config');
 const { cryptoHash } = require('../util');
 const MerkleTree = require('../TrieRoot/merkleeTree'); 
 
@@ -8,22 +8,24 @@ class Block {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
     this.hash = hash;
-    this.data = data; // ✅ Stores transactions
+    this.data = data; // Stores transactions (which should include produce fields like pricePerKg & quantity)
     this.nonce = nonce;
     this.difficulty = difficulty;
-    this.merkleRoot = merkleRoot; // ✅ Ensures transaction integrity
-    this.qualityScore = qualityScore; // ✅ AI-calculated produce quality score
+    this.merkleRoot = merkleRoot; // Ensures transaction integrity
+    this.qualityScore = qualityScore; // AI-calculated produce quality score (average for the block)
   }
 
   /**
-   * ✅ Genesis block initialization
+   * Genesis block initialization.
    */
   static genesis() {
     return new this(GENESIS_DATA);
   }
 
   /**
-   * ✅ Mines a new block with transactions
+   * Mines a new block with transactions.
+   * Modified to allow mining if every transaction is explicitly approved,
+   * even if the computed average quality score is below the threshold.
    */
   static mineBlock({ lastBlock, data }) {
     const lastHash = lastBlock.hash;
@@ -31,34 +33,35 @@ class Block {
     let { difficulty } = lastBlock;
     let nonce = 0;
 
-    // ✅ Ensure transactions are sorted by timestamp for consistency
+    // Ensure transactions are sorted by timestamp for consistency.
     const sortedTransactions = [...data].sort((a, b) => a.timestamp - b.timestamp);
 
-    // ✅ Compute the Merkle Root for transaction integrity
+    // Compute the Merkle Root for transaction integrity.
     const merkleTree = new MerkleTree(sortedTransactions.map(tx => JSON.stringify(tx)));
     const merkleRoot = merkleTree.root;
 
-    // ✅ Compute the average Quality Score for the block
+    // Compute the average Quality Score for the block.
     const totalQualityScore = sortedTransactions.reduce((sum, tx) => sum + (tx.qualityScore || 0), 0);
     const averageQualityScore = sortedTransactions.length ? totalQualityScore / sortedTransactions.length : 0;
 
-    // ✅ Ensure only transactions **above threshold quality** are mined
-    if (averageQualityScore < 50) {
-      console.error("⚠️ Block mining halted! Quality Score below threshold.");
-      return null; // Prevents block from being mined
+    // Check if quality threshold is met OR if every transaction has been explicitly approved.
+    const allApproved = sortedTransactions.every(tx => 
+      tx.qualityDecision === "APPROVED" || tx.qualityDecision === "AI_APPROVED"
+    );
+    if (!allApproved && averageQualityScore < AI_NEEDS_REVIEW_THRESHOLD) {
+      console.error("⚠️ Block mining halted! Quality Score below threshold and not all transactions are approved.");
+      return null; // Prevents block from being mined.
     }
 
-    // ✅ Proof-of-Quality (PoQ) Mining Process
+    // Proof-of-Quality (PoQ) Mining Process.
     do {
       nonce++;
       timestamp = Date.now();
       difficulty = Block.adjustDifficulty({ originalBlock: lastBlock, timestamp });
-
-      // ✅ Ensure Merkle Root & Quality Score are part of hash computation
+      // Include merkleRoot and averageQualityScore in hash computation.
       hash = cryptoHash(timestamp, lastHash, nonce, difficulty, merkleRoot, averageQualityScore);
     } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 
-    // ✅ Create and return the new block
     return new this({ 
       timestamp, 
       lastHash, 
@@ -72,7 +75,7 @@ class Block {
   }
 
   /**
-   * ✅ Adjust difficulty based on MINE_RATE
+   * Adjusts difficulty based on MINE_RATE.
    */
   static adjustDifficulty({ originalBlock, timestamp }) {
     const { difficulty } = originalBlock;
@@ -81,7 +84,7 @@ class Block {
   }
 
   /**
-   * ✅ Validates block integrity using Merkle Root
+   * Validates block integrity using Merkle Root.
    */
   static validateMerkleRoot(block) {
     const merkleTree = new MerkleTree(block.data.map(tx => JSON.stringify(tx)));
@@ -89,19 +92,17 @@ class Block {
   }
 
   /**
-   * ✅ Verifies block legitimacy before adding to blockchain
+   * Verifies block legitimacy before adding to blockchain.
    */
   static isValidBlock(block, lastBlock) {
     if (block.lastHash !== lastBlock.hash) {
       console.error("❌ ERROR: Invalid block link detected!");
       return false;
     }
-
     if (!Block.validateMerkleRoot(block)) {
       console.error("❌ ERROR: Merkle Root Mismatch! Transactions may be altered.");
       return false;
     }
-
     return true;
   }
 }

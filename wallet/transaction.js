@@ -1,42 +1,37 @@
 const uuid = require('uuid/v1');
 const { verifySignature } = require('../util');
 const { REWARD_INPUT, MINING_REWARD, VALIDATOR_REWARD_PERCENT, PLATFORM_FEE_PERCENT } = require('../config');
-const QualityCheck = require('../validators/quality-algorithm'); // ✅ AI-Based Quality Check
+const QualityCheck = require('../validators/quality-algorithm');
 
 class Transaction {
-  constructor({ senderWallet, recipient, amount, outputMap, input, iotData, sampleData, validatorApprovals, qualityScore }) {
+  constructor({ senderWallet, recipient, amount, pricePerKg, quantity, outputMap, input, iotData, sampleData, validatorApprovals, qualityScore }) {
     this.id = uuid();
-    this.iotData = iotData || {};  // ✅ IoT sensor data for produce quality
-    this.sampleData = sampleData || {};  // ✅ Physical validation data
-    this.validatorApprovals = validatorApprovals || {};  // ✅ Validator decisions
-    this.qualityScore = qualityScore || 0;  // ✅ AI-generated quality score
-    this.qualityDecision = "PENDING";  // ✅ AI or validator approval status
-    this.stakedValidators = {}; // ✅ Stores validators who have staked on this transaction
+    this.iotData = iotData || {};
+    this.sampleData = sampleData || {};
+    this.validatorApprovals = validatorApprovals || {};
+    this.qualityScore = qualityScore || 0;
+    this.qualityDecision = "PENDING";
+    this.stakedValidators = {};
 
+    // New fields for produce transactions
+    this.pricePerKg = pricePerKg;
+    this.quantity = quantity;
+
+    // Create outputMap and input if not provided.
     this.outputMap = outputMap || this.createOutputMap({ senderWallet, recipient, amount });
     this.input = input || this.createInput({ senderWallet, outputMap: this.outputMap });
   }
 
-  /**
-   * ✅ Creates an output map for payment distribution.
-   */
   createOutputMap({ senderWallet, recipient, amount }) {
     const outputMap = {};
-
-    // ✅ Calculate payment splits
     const validatorReward = (amount * VALIDATOR_REWARD_PERCENT) / 100;
     const platformFee = (amount * PLATFORM_FEE_PERCENT) / 100;
     const farmerAmount = amount - validatorReward - platformFee;
-
-    outputMap[recipient] = farmerAmount;  // ✅ Farmer receives their payment
+    outputMap[recipient] = farmerAmount;
     outputMap[senderWallet.publicKey] = senderWallet.balance - amount;
-    
     return outputMap;
   }
 
-  /**
-   * ✅ Creates input metadata for the transaction.
-   */
   createInput({ senderWallet, outputMap }) {
     return {
       timestamp: Date.now(),
@@ -46,33 +41,24 @@ class Transaction {
     };
   }
 
-  /**
-   * ✅ Updates transaction with validator approval, rejection, or stake approval.
-   */
   updateValidation({ validatorWallet, approval }) {
     this.validatorApprovals[validatorWallet.publicKey] = approval;
-
     if (approval === "STAKE_APPROVE") {
-      this.stakedValidators[validatorWallet.publicKey] = true; // ✅ Allow validators to stake
+      this.stakedValidators[validatorWallet.publicKey] = true;
     }
   }
 
-  /**
-   * ✅ Finalizes the transaction based on validator consensus & AI.
-   */
   finalizeTransaction() {
     const approvals = Object.values(this.validatorApprovals);
     const approvalCount = approvals.filter(a => a === "APPROVED" || a === "STAKE_APPROVE").length;
     const rejectionCount = approvals.filter(a => a === "REJECTED").length;
-
-    if (approvalCount > rejectionCount) {
+    const totalValidators = Object.keys(this.validatorApprovals).length || 3;
+    if (approvalCount >= Math.ceil(totalValidators / 2)) {
       console.log(`✅ Transaction ${this.id} Approved by Validators`);
       this.qualityDecision = "APPROVED";
     } else {
-      console.log(`⚠️ Transaction ${this.id} Rejected by Validators. Running AI Quality Check...`);
-      
-      // ✅ AI Quality Check as a final decision-maker
-      const aiDecision = QualityCheck.evaluateQuality(this.iotData, this.sampleData);
+      console.log(`⚠️ Transaction ${this.id} did not reach consensus. Running AI Quality Check...`);
+      const aiDecision = QualityCheck.evaluateQuality(this.iotData, this.sampleData, this.input.address);
       if (aiDecision.decision === "AUTO_APPROVE") {
         console.log(`🤖 AI Overriding Decision: Transaction ${this.id} Auto-Approved!`);
         this.qualityDecision = "AI_APPROVED";
@@ -83,37 +69,25 @@ class Transaction {
     }
   }
 
-  /**
-   * ✅ Validates transaction integrity.
-   */
   static validTransaction(transaction) {
     const { input: { address, amount, signature }, outputMap } = transaction;
-
-    const outputTotal = Object.values(outputMap)
-      .reduce((total, outputAmount) => total + outputAmount);
-
+    const outputTotal = Object.values(outputMap).reduce((total, outputAmount) => total + outputAmount, 0);
     if (amount !== outputTotal) {
-      console.error(`❌ Invalid transaction from ${address}`);
+      console.error(`❌ Invalid transaction from ${address}: Input and output totals do not match.`);
       return false;
     }
-
     if (!verifySignature({ publicKey: address, data: outputMap, signature })) {
       console.error(`❌ Invalid signature from ${address}`);
       return false;
     }
-
     return true;
   }
 
-  /**
-   * ✅ Creates a reward transaction for miners & validators.
-   */
   static rewardTransaction({ minerWallet, validatorWallets }) {
     const validatorRewards = validatorWallets.reduce((acc, wallet) => {
-      acc[wallet.publicKey] = MINING_REWARD / validatorWallets.length; // ✅ Splits mining reward across validators
+      acc[wallet.publicKey] = MINING_REWARD / validatorWallets.length;
       return acc;
     }, {});
-
     return new this({
       input: REWARD_INPUT,
       outputMap: {
@@ -125,7 +99,6 @@ class Transaction {
 }
 
 module.exports = Transaction;
-
 
 
 // const uuid = require('uuid/v1');

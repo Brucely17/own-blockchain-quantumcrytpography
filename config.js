@@ -50,9 +50,7 @@
 //   genpairval,
 //   VALIDATORS
 // };
-const { ec } = require('./util'); // ✅ Import Elliptic Curve for Key Pair Generation
-
-const MINE_RATE = 1000; 
+const MINE_RATE = 1000;
 const INITIAL_DIFFICULTY = 10;
 
 const GENESIS_DATA = {
@@ -64,37 +62,14 @@ const GENESIS_DATA = {
   data: []
 };
 
-const STARTING_BALANCE = 1000; 
-
+const STARTING_BALANCE = 1000;
 const REWARD_INPUT = { address: '*authorized-reward*' };
-const MINING_REWARD = 50; 
-
+const MINING_REWARD = 50;
 const VALIDATOR_REWARD_PERCENT = 10;
 const PLATFORM_FEE_PERCENT = 5;
-const VALIDATOR_STAKE_AMOUNT = 500; 
-
-const AI_AUTO_APPROVE_THRESHOLD = 85; 
-const AI_NEEDS_REVIEW_THRESHOLD = 50; 
-
-let VALIDATORS = []; // ✅ Global List of Validator Public Keys
-
-/**
- * ✅ Registers a new validator & updates the global list
- */
-function registerValidator(validatorPublicKey) {
-  if (!VALIDATORS.includes(validatorPublicKey)) {
-    VALIDATORS.push(validatorPublicKey);
-    console.log(`✅ Validator ${validatorPublicKey} added to the network.`);
-  }
-}
-
-/**
- * ✅ Removes a validator (if they unstake or lose reputation)
- */
-function removeValidator(validatorPublicKey) {
-  VALIDATORS = VALIDATORS.filter(key => key !== validatorPublicKey);
-  console.log(`❌ Validator ${validatorPublicKey} removed from the network.`);
-}
+const VALIDATOR_STAKE_AMOUNT = 500;
+const AI_AUTO_APPROVE_THRESHOLD = 85;
+const AI_NEEDS_REVIEW_THRESHOLD = 50;
 
 module.exports = {
   GENESIS_DATA,
@@ -106,8 +81,5 @@ module.exports = {
   PLATFORM_FEE_PERCENT,
   VALIDATOR_STAKE_AMOUNT,
   AI_AUTO_APPROVE_THRESHOLD,
-  AI_NEEDS_REVIEW_THRESHOLD,
-  VALIDATORS,
-  registerValidator,
-  removeValidator
+  AI_NEEDS_REVIEW_THRESHOLD
 };

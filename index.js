@@ -14,8 +14,6 @@ const TransactionMiner = require('./app/transaction-miner');
 const ValidatorPool = require('./validators/validator-pool');
 const QualityCheck = require('./validators/quality-algorithm');
 const IPFS = require('./util/ipfs');
-const MerkleTree = require('./TrieRoot/merkleeTree');
-const { VALIDATORS, registerValidator, removeValidator, VALIDATOR_STAKE_AMOUNT } = require('./config');
 
 const app = express();
 const blockchain = new Blockchain();
@@ -29,203 +27,197 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
 /**
- * ✅ Register as a Farmer, Validator, or Customer
+ * Register as a Farmer, Validator, or Customer.
+ * Note: In production, never expose the private key.
  */
 app.post('/api/register', async (req, res) => {
-    const { role } = req.body;
-
-    if (!role || !["farmer", "validator", "customer"].includes(role)) {
-        return res.status(400).json({ error: "Invalid role selection" });
+  const { role } = req.body;
+  if (!role || !["farmer", "validator", "customer"].includes(role)) {
+    return res.status(400).json({ error: "Invalid role selection" });
+  }
+  if (role === "validator") {
+    try {
+      wallet.stakeTokens(); // Balance is reduced here.
+      if (validatorPool.registerValidator(wallet.publicKey)) {
+        pubsub.broadcastValidatorPool();
+      }
+    } catch (err) {
+      return res.status(400).json({ error: "Insufficient balance to stake as validator" });
     }
-
-    
-
-    if (role === "validator") {
-        try {
-            wallet.stakeTokens();
-            validatorPool.registerValidator(wallet.publicKey);
-            registerValidator(wallet.publicKey);
-            pubsub.broadcastValidatorRegistration({ validatorId: wallet.publicKey });
-        } catch (err) {
-            return res.status(400).json({ error: "Insufficient balance to stake as validator" });
-        }
-    }
-
-    res.json({ message: `Registered as ${role}`, address: wallet.publicKey, privateKey: wallet.privateKey });
+  }
+  res.json({ message: `Registered as ${role}`, address: wallet.publicKey });
 });
 
 /**
- * ✅ Retrieves Wallet Information
+ * Retrieve Wallet Information.
  */
 app.get('/api/wallet-info', (req, res) => {
-    const address = wallet.publicKey;
-    const balance = Wallet.calculateBalance({ chain: blockchain.chain, address });
-
-    res.json({ address, balance });
+  const address = wallet.publicKey;
+  const balance = Wallet.calculateBalance({ chain: blockchain.chain, address });
+  res.json({ address, balance });
 });
 
 /**
- * ✅ Farmers Submit Produce Data
+ * Farmers Submit Produce Data.
  */
 app.post('/api/submit-produce', async (req, res) => {
-    try {
-        const { farmerId, pricePerKg, quantity, iotData } = req.body;
-
-        if (!farmerId || !pricePerKg || !quantity || !iotData) {
-            return res.status(400).json({ error: "Missing required data" });
-        }
-
-        const iotDataIPFS = await IPFS.uploadJSON(iotData);
-
-        let transaction = new Transaction({
-            senderWallet: wallet,
-            recipient: farmerId,
-            amount: pricePerKg * quantity,
-            iotData: iotDataIPFS,
-            qualityScore: 0,
-            validatorApprovals: {}
-        });
-
-        transactionPool.setTransaction(transaction);
-        pubsub.broadcastTransaction(transaction);
-
-        const selectedValidators = validatorPool.selectValidators(transaction.id, 3);
-        pubsub.broadcastValidatorAssignment({ transactionId: transaction.id, validators: selectedValidators });
-
-        res.json({ type: 'success', transaction, assignedValidators: selectedValidators });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Failed to submit produce data" });
+  try {
+    const { farmerId, pricePerKg, quantity, iotData } = req.body;
+    if (!farmerId || !pricePerKg || !quantity || !iotData) {
+      return res.status(400).json({ error: "Missing required data" });
     }
+    const iotDataIPFS = await IPFS.uploadJSON(iotData);
+    let transaction = new Transaction({
+      senderWallet: wallet,
+      recipient: farmerId,
+      amount: pricePerKg * quantity,
+      iotData: iotDataIPFS,
+      qualityScore: 0,
+      validatorApprovals: {}
+    });
+    transactionPool.setTransaction(transaction);
+    pubsub.broadcastTransaction(transaction);
+    const selectedValidators = validatorPool.selectValidators(transaction.id, 3);
+    pubsub.broadcastValidatorAssignment({ transactionId: transaction.id, validators: selectedValidators });
+    res.json({ type: 'success', transaction, assignedValidators: selectedValidators });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to submit produce data" });
+  }
 });
 
 /**
- * ✅ Validators Approve/Reject Transactions
+ * Validators Approve/Reject Transactions.
+ * Validators must provide physical sample data. At least 50% approvals (or all responses if consensus is lacking)
+ * trigger the transaction finalization. If consensus isn’t reached, an AI quality check is run.
  */
 app.post('/api/validate-produce', async (req, res) => {
-    try {
-        const { validatorId, transactionId, sampleData, approval } = req.body;
-
-        if (!validatorId || !transactionId || !sampleData || !approval) {
-            return res.status(400).json({ error: "Missing required data" });
-        }
-
-        let transaction = transactionPool.transactionMap[transactionId];
-        if (!transaction) {
-            return res.status(404).json({ error: "Transaction not found" });
-        }
-
-        const sampleDataIPFS = await IPFS.uploadJSON(sampleData);
-        transaction.sampleData = sampleDataIPFS;
-        transaction.validatorApprovals[validatorId] = approval;
-
-        const approvals = Object.values(transaction.validatorApprovals);
-        if (approvals.filter(a => a === "APPROVED").length >= Math.ceil(Object.keys(validatorPool.validators).length / 2)) {
-            transaction.qualityDecision = "APPROVED";
-            pubsub.broadcastTransaction(transaction);
-        } else if (approvals.length >= Math.ceil(Object.keys(validatorPool.validators).length / 2)) {
-            const qualityCheck = QualityCheck.evaluateQuality(transaction.iotData, transaction.sampleData);
-            if (qualityCheck.decision === "AUTO_APPROVE") {
-                transaction.qualityDecision = "AI_APPROVED";
-                pubsub.broadcastTransaction(transaction);
-            } else {
-                transaction.qualityDecision = "REJECTED";
-            }
-        }
-
-        res.json({ type: 'success', transaction });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Failed to validate transaction" });
+  try {
+    const { validatorId, transactionId, sampleData, approval } = req.body;
+    if (!validatorId || !transactionId || !sampleData || !approval) {
+      return res.status(400).json({ error: "Missing required data" });
     }
+    let transaction = transactionPool.transactionMap[transactionId];
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+    // Upload physical sample data to IPFS
+    const sampleDataIPFS = await IPFS.uploadJSON(sampleData);
+    transaction.sampleData = sampleDataIPFS;
+    transaction.validatorApprovals[validatorId] = approval;
+    const totalValidators = Object.keys(validatorPool.validators).length || 3;
+    const approvalsArray = Object.values(transaction.validatorApprovals);
+    if (approvalsArray.filter(a => a === "APPROVED").length >= Math.ceil(totalValidators / 2)) {
+      transaction.qualityDecision = "APPROVED";
+      pubsub.broadcastTransaction(transaction);
+    } else if (approvalsArray.length >= totalValidators) {
+      // If all validators have responded but consensus isn't reached, run AI check.
+      const qualityResult = QualityCheck.evaluateQuality(transaction.iotData, transaction.sampleData, transaction.input.address);
+      if (qualityResult.decision === "AUTO_APPROVE") {
+        transaction.qualityDecision = "AI_APPROVED";
+        pubsub.broadcastTransaction(transaction);
+      } else {
+        transaction.qualityDecision = "REJECTED";
+      }
+    }
+    res.json({ type: 'success', transaction });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to validate transaction" });
+  }
 });
 
 /**
- * ✅ Mine Transactions (Only Validated Ones)
+ * Mine Transactions (Manual Trigger).
  */
 app.get('/api/mine-transactions', (req, res) => {
-    transactionMiner.mineTransactions();
-    res.redirect('/api/blocks');
+  transactionMiner.mineTransactions();
+  res.redirect('/api/blocks');
 });
 
 /**
- * ✅ Retrieve Blockchain Data
+ * Retrieve Blockchain Data.
  */
 app.get('/api/blocks', (req, res) => {
-    res.json(blockchain.chain);
+  res.json(blockchain.chain);
 });
 
 /**
- * ✅ Retrieve Validator List
+ * Retrieve Validator List.
  */
 app.get('/api/validators', (req, res) => {
-    res.json(VALIDATORS);
+  res.json(validatorPool.validators);
 });
 
 /**
- * ✅ Retrieve Transaction Pool Map
+ * Retrieve Transaction Pool Map.
  */
 app.get('/api/transaction-pool-map', (req, res) => {
-    res.json(transactionPool.transactionMap);
+  res.json(transactionPool.transactionMap);
 });
 
 /**
- * ✅ Retrieve Known Wallet Addresses
+ * Retrieve Known Wallet Addresses.
  */
 app.get('/api/known-addresses', async (req, res) => {
-    const addressMap = {};
-    for (let block of blockchain.chain) {
-        for (let transaction of block.data) {
-            const recipient = Object.keys(transaction.outputMap);
-            recipient.forEach(recipient => addressMap[recipient] = recipient);
-        }
+  const addressMap = {};
+  for (let block of blockchain.chain) {
+    for (let transaction of block.data) {
+      const recipients = Object.keys(transaction.outputMap);
+      recipients.forEach(recipient => addressMap[recipient] = recipient);
     }
-    res.json(Object.keys(addressMap));
+  }
+  res.json(Object.keys(addressMap));
 });
 
 /**
- * ✅ Merkle Tree Verification
+ * Merkle Tree Verification.
  */
 app.get('/api/merkle-tree', (req, res) => {
-    const blockHashes = blockchain.chain.map(block => block.hash);
-    if (blockHashes.length === 0) return res.json({ message: "No blocks available" });
-
-    const merkleTree = new MerkleTree(blockHashes);
-    res.json({ merkleRoot: merkleTree.root, levels: merkleTree.buildLevels() });
+  const blockHashes = blockchain.chain.map(block => block.hash);
+  if (blockHashes.length === 0) return res.json({ message: "No blocks available" });
+  const merkleTree = new (require('./TrieRoot/merkleeTree'))(blockHashes);
+  res.json({ merkleRoot: merkleTree.root, levels: merkleTree.buildLevels() });
 });
 
 /**
- * ✅ Sync Blockchain & Validators with Peers
+ * Sync Blockchain & Validators with Peers.
  */
 const syncWithRootState = () => {
-    request({ url: `${ROOT_NODE_ADDRESS}/api/blocks` }, (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-            const rootChain = JSON.parse(body);
-            blockchain.replaceChain(rootChain);
-        }
-    });
-
-    request({ url: `${ROOT_NODE_ADDRESS}/api/validators` }, (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-            const validatorList = JSON.parse(body);
-            validatorList.forEach(registerValidator);
-        }
-    });
+  request({ url: `${ROOT_NODE_ADDRESS}/api/blocks` }, (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+      const rootChain = JSON.parse(body);
+      blockchain.replaceChain(rootChain);
+    }
+  });
+  request({ url: `${ROOT_NODE_ADDRESS}/api/validators` }, (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+      const rootValidatorPool = JSON.parse(body);
+      validatorPool.syncValidatorPool(rootValidatorPool);
+    }
+  });
 };
 
 let PEER_PORT;
 if (process.env.GENERATE_PEER_PORT === 'true') {
-    PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
-    
+  PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
 }
 
-const PORT = process.env.PORT || PEER_PORT || 3000;
+const PORT = process.env.PORT || PEER_PORT || DEFAULT_PORT;
 app.listen(PORT, () => {
-    console.log(`✅ Listening at http://localhost:${PORT}/`);
-    syncWithRootState();
+  console.log(`✅ Listening at http://localhost:${PORT}/`);
+  syncWithRootState();
 });
 
-
+// Automatic Mining Trigger: Every 5 seconds, if at least 50% of validators have approved pending transactions.
+setInterval(() => {
+  const validTransactions = transactionPool.validTransactions();
+  const MIN_TRANSACTIONS_FOR_MINING = 1; // Trigger mining if at least one valid transaction exists
+  if (validTransactions.length >= MIN_TRANSACTIONS_FOR_MINING) {
+    console.log(`✅ ${validTransactions.length} valid transaction(s) detected. Initiating automatic mining...`);
+    transactionMiner.mineTransactions();
+  }
+}, 5000);
 
 // const bodyParser = require('body-parser');
 // const express = require('express');

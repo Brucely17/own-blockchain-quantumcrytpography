@@ -1,5 +1,5 @@
 const Transaction = require('../wallet/transaction');
-const QualityCheck = require('../validators/quality-algorithm'); // ✅ AI-Based Quality Check
+const QualityCheck = require('../validators/quality-algorithm');
 
 class TransactionMiner {
   constructor({ blockchain, transactionPool, wallet, pubsub, validatorPool, paymentProcessor }) {
@@ -11,126 +11,83 @@ class TransactionMiner {
     this.paymentProcessor = paymentProcessor;
   }
 
-  /**
-   * ✅ Mines only **validated** transactions & adds them to the blockchain.
-   */
   mineTransactions() {
-    const validTransactions = this.transactionPool.validTransactions().filter(tx => {
-      const approvals = Object.keys(tx.validatorApprovals || {}).length;
-      return approvals >= Math.ceil(Object.keys(this.validatorPool.validators).length / 2); 
-    });
-
+    const validTransactions = this.transactionPool.validTransactions();
     if (validTransactions.length === 0) {
-      console.log('⚠️ No transactions meet approval requirements. Running AI Quality Check...');
-      return this.runAIQualityCheck();
+      console.log('⚠️ No valid transactions meet approval requirements. Running AI Quality Check...');
+      this.runAIQualityCheck();
+      return;
     }
-
-    // ✅ Aggregate quality scores for the block
-    const totalQualityScore = validTransactions.reduce((sum, tx) => sum + tx.qualityScore, 0);
-    const averageQualityScore = validTransactions.length > 0 ? (totalQualityScore / validTransactions.length) : 0;
-
-    // ✅ Store validated transactions & IoT data in the blockchain
-    const verifiedData = validTransactions.map(tx => ({
-      farmerId: tx.sender, // ✅ Public Key as Farmer ID
-      pricePerKg: tx.pricePerKg,
-      quantity: tx.quantity,
-      iotDataIPFS: tx.iotDataIPFS, // ✅ IPFS Data Reference
-      validationReports: tx.validatorApprovals, // ✅ Validator Reports
-      finalStatus: 'APPROVED',
-      qualityScore: tx.qualityScore
-    }));
-
-    // ✅ Mine a new block with verified transactions
-    this.blockchain.addBlock({ data: verifiedData, qualityScore: averageQualityScore });
-
-    // ✅ Broadcast the updated blockchain to all nodes
+    // Add block to blockchain using the valid transactions
+    this.blockchain.addBlock({ data: validTransactions });
     this.pubsub.broadcastChain();
-
-    // ✅ Process payments to farmers & validators
-    verifiedData.forEach(tx => this.processPayments(tx));
-
-    // ✅ Clear transaction pool after mining
+    validTransactions.forEach(tx => this.processPayments(tx));
     this.transactionPool.clear();
   }
 
-  /**
-   * ✅ Runs AI-based Quality Check when validators **fail** to approve.
-   */
   runAIQualityCheck() {
     const rejectedTransactions = this.transactionPool.validTransactions().filter(tx => {
+      const defaultValidatorCount = 3;
       const approvals = Object.keys(tx.validatorApprovals || {}).length;
-      return approvals < Math.ceil(Object.keys(this.validatorPool.validators).length / 2);
+      return approvals < Math.ceil(defaultValidatorCount / 2);
     });
-
     rejectedTransactions.forEach(tx => {
-      const qualityResult = QualityCheck.evaluateQuality(tx.iotData, tx.sampleData);
-
+      const qualityResult = QualityCheck.evaluateQuality(tx.iotData, tx.sampleData, tx.input.address, []);
       if (qualityResult.decision === "AUTO_APPROVE") {
-        console.log(`🤖 AI Decision: Transaction ${tx.id} auto-approved based on IoT data.`);
+        console.log(`🤖 AI Decision: Transaction ${tx.id} auto-approved.`);
         this.finalizeTransaction(tx, "APPROVED");
       } else {
-        console.log(`❌ AI Decision: Transaction ${tx.id} rejected due to quality mismatch.`);
+        console.log(`❌ AI Decision: Transaction ${tx.id} rejected.`);
         this.finalizeTransaction(tx, "REJECTED");
       }
     });
   }
 
-  /**
-   * ✅ Finalizes the transaction & adds it to the blockchain.
-   */
   finalizeTransaction(transaction, status) {
     transaction.qualityDecision = status;
-
-    if (status === "APPROVED") {
-      this.blockchain.addBlock({ data: transaction, qualityScore: transaction.qualityScore });
+    if (status === "APPROVED" || status === "AI_APPROVED") {
+      this.blockchain.addBlock({ data: [transaction] });
+      console.log(`✅ Finalized and added transaction ${transaction.id} to the blockchain.`);
       this.pubsub.broadcastChain();
       this.transactionPool.clearBlockchainTransactions({ chain: this.blockchain.chain });
-
-      // ✅ Process Payments
       this.processPayments(transaction);
+    } else {
+      console.log(`❌ Transaction ${transaction.id} marked as REJECTED.`);
     }
   }
 
-  /**
-   * ✅ Distributes payments to **Farmer, Validators, and Platform Provider**.
-   */
   processPayments(transaction) {
+    // Use transaction.pricePerKg and transaction.quantity for payment calculation.
     const totalAmount = transaction.pricePerKg * transaction.quantity;
-    const farmerShare = totalAmount * 0.85;  // ✅ 85% to Farmer
-    const validatorShare = totalAmount * 0.10;  // ✅ 10% to Validators
-    const platformShare = totalAmount * 0.05;  // ✅ 5% to Platform
-
+    const farmerShare = totalAmount * 0.85;
+    const validatorShare = totalAmount * 0.10;
+    const platformShare = totalAmount * 0.05;
     console.log(`💰 Processing Payments for Transaction ${transaction.id}`);
-    console.log(`   - Farmer ${transaction.farmerId}: ${farmerShare} tokens`);
-    console.log(`   - Validators: ${validatorShare} tokens distributed`);
-    console.log(`   - Platform Fee: ${platformShare} tokens`);
-
-    // ✅ Process Farmer Payment
-    this.paymentProcessor.processPayment({
-      transactionId: transaction.id,
-      farmerId: transaction.farmerId,
-      amount: farmerShare,
-      validatorPayments: this.calculateValidatorPayments(transaction, validatorShare),
-      platformAmount: platformShare
-    });
+    console.log(`   - Farmer: ${farmerShare} tokens`);
+    console.log(`   - Validators: ${validatorShare} tokens`);
+    console.log(`   - Platform: ${platformShare} tokens`);
+    if (this.paymentProcessor) {
+      this.paymentProcessor.processPayment({
+        transactionId: transaction.id,
+        farmerId: transaction.recipient, // Assuming recipient is the farmer
+        amount: farmerShare,
+        validatorPayments: this.calculateValidatorPayments(transaction, validatorShare),
+        platformAmount: platformShare
+      });
+    }
   }
 
-  /**
-   * ✅ **Distributes validator rewards** based on reputation.
-   */
   calculateValidatorPayments(transaction, totalValidatorShare) {
-    const validatorCount = Object.keys(transaction.validatorApprovals).length;
-    const perValidatorPayment = validatorCount > 0 ? totalValidatorShare / validatorCount : 0;
-
-    return Object.keys(transaction.validatorApprovals).map(validatorId => ({
+    const validatorIds = Object.keys(transaction.validatorApprovals || {});
+    const perValidatorPayment = validatorIds.length > 0 ? totalValidatorShare / validatorIds.length : 0;
+    return validatorIds.map(validatorId => ({
       validatorId,
-      amount: perValidatorPayment + (this.validatorPool.validators[validatorId]?.reputation * 0.01 || 0) // ✅ Higher reputation = higher bonus
+      amount: perValidatorPayment
     }));
   }
 }
 
 module.exports = TransactionMiner;
-
 
 
 // const Transaction = require('../wallet/transaction');

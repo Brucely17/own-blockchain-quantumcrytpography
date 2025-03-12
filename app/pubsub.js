@@ -6,15 +6,17 @@ const credentials = {
   secretKey: 'sec-c-NWIyNDZlZDItYWYyOS00ZWNlLTgzMTEtYjJiNDMyZjJiZTcz'
 };
 
+
 const CHANNELS = {
-  BLOCKCHAIN: 'BLOCKCHAIN',        
-  TRANSACTION: 'TRANSACTION',      
-  VALIDATION: 'VALIDATION',        
-  IOT_DATA: 'IOT_DATA',            
-  PAYMENT: 'PAYMENT',              
-  VALIDATOR_ASSIGNMENT: 'VALIDATOR_ASSIGNMENT',  
-  USER_REGISTRATION: 'USER_REGISTRATION',  // ✅ NEW: Broadcasts Farmers, Validators, Users
-  VALIDATOR_REGISTRATION: 'VALIDATOR_REGISTRATION' 
+  BLOCKCHAIN: 'BLOCKCHAIN',
+  TRANSACTION: 'TRANSACTION',
+  VALIDATION: 'VALIDATION',
+  IOT_DATA: 'IOT_DATA',
+  PAYMENT: 'PAYMENT',
+  VALIDATOR_ASSIGNMENT: 'VALIDATOR_ASSIGNMENT',
+  USER_REGISTRATION: 'USER_REGISTRATION',
+  VALIDATOR_REGISTRATION: 'VALIDATOR_REGISTRATION',
+  VALIDATOR_POOL: 'VALIDATOR_POOL'
 };
 
 class PubSub {
@@ -24,103 +26,50 @@ class PubSub {
     this.validatorPool = validatorPool;
     this.paymentProcessor = paymentProcessor;
     this.qualityCheck = qualityCheck;
-    this.userRegistry = userRegistry; // ✅ Stores farmers, validators & users
-
+    this.userRegistry = userRegistry;
     this.pubnub = new PubNub(credentials);
     this.pubnub.subscribe({ channels: Object.values(CHANNELS) });
     this.pubnub.addListener(this.createListener());
   }
 
-  /**
-   * ✅ Handles incoming messages across different channels
-   */
   handleMessage(channel, message) {
     const parsedMessage = JSON.parse(message);
-
     switch (channel) {
       case CHANNELS.BLOCKCHAIN:
         this.blockchain.replaceChain(parsedMessage, true, () => {
           this.transactionPool.clearBlockchainTransactions({ chain: parsedMessage });
         });
         break;
-
-      case CHANNELS.TRANSACTION:  
-        console.log(`🔄 New Produce Submission from Farmer: ${parsedMessage.sender}`);
+      case CHANNELS.TRANSACTION:
+        console.log(`🔄 New Transaction received`);
         this.transactionPool.setTransaction(parsedMessage);
-        this.autoAssignValidators(parsedMessage.id);
         break;
-
-      case CHANNELS.VALIDATOR_ASSIGNMENT:  
-        console.log(`📌 Validators Assigned: ${parsedMessage.validators} for Transaction ${parsedMessage.transactionId}`);
+      case CHANNELS.VALIDATION:
+        console.log(`🔍 Validator decision received`);
         this.validatorPool.registerValidator(parsedMessage.validatorId);
         break;
-
-      case CHANNELS.VALIDATION:  
-        console.log(`🔍 Validator ${parsedMessage.validatorId} validated Transaction: ${parsedMessage.transactionId}`);
-        this.validatorPool.addValidation(parsedMessage);
-        this.checkValidationConsensus(parsedMessage.transactionId);
+      case CHANNELS.IOT_DATA:
+        console.log(`📡 IoT Data received`);
         break;
-
-      case CHANNELS.IOT_DATA:  
-        console.log(`📡 Received IoT Data for Produce: ${parsedMessage.farmerId}`);
-        this.transactionPool.setTransaction(parsedMessage);
+      case CHANNELS.PAYMENT:
+        console.log(`💰 Payment processed`);
         break;
-
-      case CHANNELS.PAYMENT:  
-        console.log(`💰 Payment Processed for Transaction: ${parsedMessage.transactionId}`);
-        this.paymentProcessor.processPayment(parsedMessage);
+      case CHANNELS.USER_REGISTRATION:
+        console.log(`✅ New user registered: ${parsedMessage.address}`);
         break;
-
-      case CHANNELS.USER_REGISTRATION:  
-        console.log(`✅ New ${parsedMessage.role} Registered: ${parsedMessage.address}`);
-        this.userRegistry.registerUser(parsedMessage);
-        break;
-      
-        case CHANNELS.VALIDATOR_REGISTRATION:
-        if (!VALIDATORS.includes(parsedMessage.validatorId)) {
+      case CHANNELS.VALIDATOR_REGISTRATION:
+        if (!this.validatorPool.validators[parsedMessage.validatorId]) {
           console.log(`🔔 New Validator Registered: ${parsedMessage.validatorId}`);
           this.validatorPool.registerValidator(parsedMessage.validatorId);
-          registerValidator(parsedMessage.validatorId); // ✅ Update global validator list
         }
         break;
-
+      case CHANNELS.VALIDATOR_POOL:
+        console.log(`🔄 Syncing Validator Pool`);
+        this.validatorPool.syncValidatorPool(parsedMessage);
+        break;
       default:
         console.warn(`⚠️ Unknown channel: ${channel}`);
     }
-  }
-
-  /**
-   * ✅ Auto-assign validators when a transaction is created.
-   */
-  autoAssignValidators(transactionId) {
-    if (!transactionId) {
-      console.error("❌ ERROR: Transaction ID is undefined. Cannot assign validators.");
-      return;
-    }
-
-    // ✅ Select only registered and staked validators
-    const selectedValidators = this.validatorPool.selectValidators(transactionId, 3);
-
-    if (!selectedValidators.length) {
-      console.error("❌ ERROR: No registered validators available!");
-      return;
-    }
-
-    this.broadcastValidatorAssignment({ transactionId, validators: selectedValidators });
-  }
-
-
-  
-  /**
-   * ✅ Broadcast new validator registration to all nodes.
-   */
-  broadcastValidatorRegistration({ validatorId }) {
-    this.publish({
-      channel: CHANNELS.VALIDATOR_REGISTRATION,
-      message: JSON.stringify({ validatorId })
-    });
-
-    console.log(`✅ Broadcasted new validator registration: ${validatorId}`);
   }
 
   createListener() {
@@ -136,9 +85,6 @@ class PubSub {
     this.pubnub.publish({ channel, message });
   }
 
-  /**
-   * ✅ Broadcast the latest blockchain state to all nodes
-   */
   broadcastChain() {
     this.publish({
       channel: CHANNELS.BLOCKCHAIN,
@@ -146,9 +92,6 @@ class PubSub {
     });
   }
 
-  /**
-   * ✅ Broadcast a new transaction (Farmer's produce submission)
-   */
   broadcastTransaction(transaction) {
     this.publish({
       channel: CHANNELS.TRANSACTION,
@@ -156,100 +99,24 @@ class PubSub {
     });
   }
 
-  /**
-   * ✅ Broadcast IoT data
-   */
-  broadcastIoTData(iotData) {
-    this.publish({
-      channel: CHANNELS.IOT_DATA,
-      message: JSON.stringify(iotData)
-    });
-  }
-
-  /**
-   * ✅ Broadcast validator approvals
-   */
-  broadcastValidation(validation) {
-    this.publish({
-      channel: CHANNELS.VALIDATION,
-      message: JSON.stringify(validation)
-    });
-  }
-
-  /**
-   * ✅ Broadcast assigned validators for a transaction
-   */
   broadcastValidatorAssignment({ transactionId, validators }) {
     this.publish({
       channel: CHANNELS.VALIDATOR_ASSIGNMENT,
       message: JSON.stringify({ transactionId, validators })
     });
-
     console.log(`✅ Validators Assigned for Transaction ${transactionId}: ${validators}`);
   }
 
-  /**
-   * ✅ Broadcast user registration (Farmer, Validator, Customer)
-   */
-  broadcastUserRegistration({ role, address }) {
+  broadcastValidatorPool() {
     this.publish({
-      channel: CHANNELS.USER_REGISTRATION,
-      message: JSON.stringify({ role, address })
+      channel: CHANNELS.VALIDATOR_POOL,
+      message: JSON.stringify(this.validatorPool.validators)
     });
-
-    console.log(`📢 New ${role} Registered: ${address}`);
-  }
-
-  /**
-   * ✅ Broadcast payment processing
-   */
-  broadcastPayment(payment) {
-    this.publish({
-      channel: CHANNELS.PAYMENT,
-      message: JSON.stringify(payment)
-    });
-    
-
-
-  }
-
-  /**
-   * ✅ Checks validation consensus
-   */
-  checkValidationConsensus(transactionId) {
-    const transaction = this.transactionPool.transactionMap[transactionId];
-
-    if (!transaction) {
-      console.error(`❌ ERROR: Transaction ${transactionId} not found!`);
-      return;
-    }
-
-    const approvals = Object.values(transaction.validatorApprovals);
-    const totalValidators = Object.keys(this.validatorPool.validators).length;
-    const requiredApprovals = Math.ceil(totalValidators / 2); // 50%+ approval needed
-
-    if (approvals.filter(a => a === "APPROVED").length >= requiredApprovals) {
-      console.log(`✅ Transaction ${transactionId} is fully validated! Adding to blockchain.`);
-      transaction.qualityDecision = "APPROVED";
-      this.broadcastTransaction(transaction);
-    } else if (approvals.length >= requiredApprovals) {
-      console.log(`⚠️ Transaction ${transactionId} did not meet approval criteria. Checking AI decision.`);
-      const qualityCheck = this.qualityCheck.evaluateQuality(transaction.iotData, transaction.sampleData);
-
-      if (qualityCheck.decision === "AUTO_APPROVE") {
-        console.log(`✅ AI has auto-approved Transaction ${transactionId}`);
-        transaction.qualityDecision = "AI_APPROVED";
-        this.broadcastTransaction(transaction);
-      } else {
-        console.log(`❌ Transaction ${transactionId} rejected by majority & AI.`);
-        transaction.qualityDecision = "REJECTED";
-      }
-    }
+    console.log(`✅ Broadcasted Validator Pool.`);
   }
 }
 
 module.exports = PubSub;
-
 
 
 // const PubNub = require('pubnub');

@@ -1,98 +1,73 @@
-const QualityCheck = require('../validators/quality-algorithm'); // ✅ AI-Based Quality Check
+const QualityCheck = require('../validators/quality-algorithm');
 
 class TransactionPool {
   constructor() {
-    this.transactionMap = {}; // ✅ Stores all transactions in the pool
-    this.rejectedTransactions = {}; // ✅ Stores rejected transactions for re-evaluation
-    this.validatorStakedTransactions = {}; // ✅ Tracks validator-approved transactions
+    this.transactionMap = {};
+    this.rejectedTransactions = {};
+    this.validatorStakedTransactions = {};
   }
 
-  /**
-   * ✅ Clears the transaction pool.
-   */
   clear() {
     this.transactionMap = {};
     this.validatorStakedTransactions = {};
   }
 
-  /**
-   * ✅ Adds a new transaction to the pool.
-   */
   setTransaction(transaction) {
     this.transactionMap[transaction.id] = transaction;
   }
 
-  /**
-   * ✅ Sets the entire transaction pool map.
-   */
   setMap(transactionMap) {
     this.transactionMap = transactionMap;
   }
 
-  /**
-   * ✅ Checks if a transaction already exists from the sender.
-   */
   existingTransaction({ inputAddress }) {
     return Object.values(this.transactionMap).find(tx => tx.input.address === inputAddress);
   }
 
-  /**
-   * ✅ Returns only transactions that meet Proof-of-Quality (PoQ) requirements:
-   * - 50%+ validator approvals **OR**
-   * - AI Quality Score auto-approval **OR**
-   * - Validator-staked transactions.
-   */
   validTransactions() {
     return Object.values(this.transactionMap).filter(transaction => {
+      // Use the actual validator pool count if available; here default to 3.
+      const defaultValidatorCount = 3;
       const approvals = Object.keys(transaction.validatorApprovals || {}).length;
       return (
-        approvals >= Math.ceil(Object.keys(transaction.validatorPool || {}).length / 2) ||
+        approvals >= Math.ceil(defaultValidatorCount / 2) ||
         transaction.qualityDecision === "AUTO_APPROVE" ||
-        this.validatorStakedTransactions[transaction.id] // ✅ Allows validator-staked transactions
+        this.validatorStakedTransactions[transaction.id]
       );
     });
   }
 
-  /**
-   * ✅ Moves rejected transactions to a separate list for AI re-evaluation.
-   */
   rejectTransaction(transaction) {
     this.rejectedTransactions[transaction.id] = transaction;
     delete this.transactionMap[transaction.id];
     console.log(`❌ Transaction ${transaction.id} rejected & stored for AI review.`);
   }
 
-  /**
-   * ✅ Validators can stake to override rejections.
-   */
   stakeValidatorTransaction(transactionId, validatorId) {
     if (!this.rejectedTransactions[transactionId]) {
       console.log(`❌ ERROR: Transaction ${transactionId} not found in rejected list.`);
       return;
     }
-
     this.validatorStakedTransactions[transactionId] = validatorId;
-    this.setTransaction(this.rejectedTransactions[transactionId]); // ✅ Reinstates the transaction
+    this.setTransaction(this.rejectedTransactions[transactionId]);
     delete this.rejectedTransactions[transactionId];
-
     console.log(`🔒 Validator ${validatorId} staked approval for Transaction ${transactionId}`);
   }
 
-  /**
-   * ✅ Re-evaluates rejected transactions using AI & validator override.
-   */
   revalidateRejectedTransactions(qualityCheck) {
     Object.values(this.rejectedTransactions).forEach(transaction => {
-      // ✅ If a validator has already staked, auto-approve
       if (this.validatorStakedTransactions[transaction.id]) {
         console.log(`✅ Validator override: Transaction ${transaction.id} approved.`);
         this.setTransaction(transaction);
         delete this.rejectedTransactions[transaction.id];
         return;
       }
-
-      // ✅ AI-Based Quality Check
-      const qualityResult = qualityCheck.evaluateQuality(transaction.iotData, transaction.sampleData, transaction.sender, []);
+      const qualityResult = qualityCheck.evaluateQuality(
+        transaction.iotData,
+        transaction.sampleData,
+        transaction.input.address,
+        []
+      );
       if (qualityResult.decision === "AUTO_APPROVE") {
         console.log(`🤖 AI Auto-Approved Transaction ${transaction.id}`);
         this.setTransaction(transaction);
@@ -103,13 +78,9 @@ class TransactionPool {
     });
   }
 
-  /**
-   * ✅ Clears transactions that have already been added to the blockchain.
-   */
   clearBlockchainTransactions({ chain }) {
     for (let i = 1; i < chain.length; i++) {
       const block = chain[i];
-
       for (let transaction of block.data) {
         if (this.transactionMap[transaction.id]) {
           delete this.transactionMap[transaction.id];
