@@ -180,6 +180,9 @@ app.get('/api/merkle-tree', (req, res) => {
   res.json({ merkleRoot: merkleTree.root, levels: merkleTree.buildLevels() });
 });
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
+});
 /**
  * Sync Blockchain & Validators with Peers.
  */
@@ -218,6 +221,8 @@ setInterval(() => {
     transactionMiner.mineTransactions();
   }
 }, 5000);
+
+
 
 // const bodyParser = require('body-parser');
 // const express = require('express');

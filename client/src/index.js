@@ -6,11 +6,11 @@ import App from './components/App';
 import Blocks from './components/Blocks';
 import ConductTransaction from './components/ConductTransaction';
 import TransactionPool from './components/TransactionPool';
-import LoginMain from './LoginBoxfile/LoginMain';
+
 import AccountData from './components/AccountData';
 
 import MerkleTreeVisualizer from './components/MerkleTreeVisualizer';
-
+import Login from './components/Login';
 import './index.css';
 import CryptoFileSystem from './src/CryptoFileSytem';
 
@@ -19,7 +19,7 @@ render(
     <Switch>
     <Route exact path='/bankaccount' component={AccountData}/>
       <Route exact path='/' component={App} />
-      <Route exact path='/login' component={LoginMain}/>
+      <Route path='/login' component={Login} />
       <Route path='/blocks' component={Blocks} />
       <Route path='/conduct-transaction' component={ConductTransaction} />
       <Route path='/transaction-pool' component={TransactionPool} />

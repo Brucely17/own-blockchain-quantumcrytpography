@@ -1,11 +1,11 @@
 const PubNub = require('pubnub');
 
 const credentials = {
-  publishKey: 'pub-c-cd49875d-585e-4e62-acb3-5eb7888142d3',
-  subscribeKey: 'sub-c-f03c2efa-8490-4ac8-bd64-a1570dd4a599',
-  secretKey: 'sec-c-NWIyNDZlZDItYWYyOS00ZWNlLTgzMTEtYjJiNDMyZjJiZTcz'
+  publishKey: 'pub-c-9f4a9266-8211-4429-9607-25e0777c3d1f',
+  subscribeKey: 'sub-c-ed5cb068-328c-4a55-8779-4f88a9bfeecd',
+  secretKey: 'sec-c-NjI5OGE0NjYtNWQ2OS00YTMyLThlZmUtYWU4MWFiYWYwM2Rm',
+  timeout:"30000"
 };
-
 
 const CHANNELS = {
   BLOCKCHAIN: 'BLOCKCHAIN',
@@ -15,7 +15,7 @@ const CHANNELS = {
   PAYMENT: 'PAYMENT',
   VALIDATOR_ASSIGNMENT: 'VALIDATOR_ASSIGNMENT',
   USER_REGISTRATION: 'USER_REGISTRATION',
-  VALIDATOR_REGISTRATION: 'VALIDATOR_REGISTRATION',
+  VALIDATOR_REGISTRATION: 'VALIDATOR_REGISTRATION', 
   VALIDATOR_POOL: 'VALIDATOR_POOL'
 };
 
