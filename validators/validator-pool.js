@@ -1,6 +1,9 @@
+// validators/validator-pool.js
+const MAX_QUEUE_LENGTH = 3;
+
 class ValidatorPool {
   constructor() {
-    this.validators = {}; // Stores validators and their stats
+    this.validators = {}; // { validatorId: { reputation, assignedTransactions, transactionQueue, ... } }
   }
   
   registerValidator(validatorId) {
@@ -9,29 +12,51 @@ class ValidatorPool {
         reputation: 100,
         assignedTransactions: 0,
         totalApprovals: 0,
-        totalRejections: 0
+        totalRejections: 0,
+        transactionQueue: []
       };
-      console.log(`✅ Validator ${validatorId} registered with reputation 100.`);
+      console.log(`Validator ${validatorId} registered with reputation 100.`);
       return true;
     }
     return false;
   }
   
-  selectValidators(transactionId, count = 3) {
-    const sortedValidators = Object.keys(this.validators)
-      .sort((a, b) => {
-        const repDiff = this.validators[b].reputation - this.validators[a].reputation;
-        if (repDiff === 0) {
-          return this.validators[a].assignedTransactions - this.validators[b].assignedTransactions;
-        }
-        return repDiff;
-      });
-    const selectedValidators = sortedValidators.slice(0, count);
-    selectedValidators.forEach(validator => {
-      this.validators[validator].assignedTransactions += 1;
+  // Assign transaction to up to 'count' validators.
+  assignTransaction(transaction, count = 3) {
+    // Sort validators by reputation (descending) and queue length (ascending)
+    const sorted = Object.entries(this.validators).sort(([, a], [, b]) => {
+      const repDiff = b.reputation - a.reputation;
+      if (repDiff === 0) {
+        const lenA = Array.isArray(a.transactionQueue) ? a.transactionQueue.length : 0;
+        const lenB = Array.isArray(b.transactionQueue) ? b.transactionQueue.length : 0;
+        return lenA - lenB;
+      }
+      return repDiff;
     });
-    console.log(`🔍 Selected Validators for Transaction ${transactionId}: ${selectedValidators}`);
-    return selectedValidators;
+    
+    const assigned = [];
+    for (const [validatorId, info] of sorted) {
+      if (Array.isArray(info.transactionQueue) && info.transactionQueue.length < MAX_QUEUE_LENGTH) {
+        info.transactionQueue.push(transaction.id);
+        info.assignedTransactions++;
+        assigned.push(validatorId);
+        if (assigned.length === count) break;
+      }
+    }
+    if (assigned.length === 0) {
+      console.warn(`All validator queues are full for transaction ${transaction.id}.`);
+      return null;
+    }
+    console.log(`Transaction ${transaction.id} assigned to validators: ${assigned}`);
+    return assigned;
+  }
+  
+  removeTransactionFromQueue(validatorId, transactionId) {
+    if (this.validators[validatorId] && Array.isArray(this.validators[validatorId].transactionQueue)) {
+      const queue = this.validators[validatorId].transactionQueue;
+      const idx = queue.indexOf(transactionId);
+      if (idx !== -1) queue.splice(idx, 1);
+    }
   }
   
   updateReputation(validatorId, isAccurate) {
@@ -45,22 +70,10 @@ class ValidatorPool {
     }
     this.validators[validatorId].reputation = Math.max(0, Math.min(200, this.validators[validatorId].reputation));
     if (this.validators[validatorId].reputation < 20) {
-      console.warn(`⚠️ Validator ${validatorId} removed due to low reputation.`);
+      console.warn(`Validator ${validatorId} removed due to low reputation.`);
       delete this.validators[validatorId];
     }
-    console.log(`🔄 Validator ${validatorId} reputation updated to ${this.validators[validatorId]?.reputation}`);
-  }
-  
-  detectValidatorFraud(validatorId, pastValidations) {
-    let approvedLowQuality = pastValidations.filter(validation => 
-      validation.qualityScore < 50 && validation.approval === "APPROVED"
-    ).length;
-    let totalValidations = pastValidations.length;
-    if (totalValidations > 10 && (approvedLowQuality / totalValidations) > 0.3) {
-      console.warn(`⚠️ Validator ${validatorId} flagged for approving low-quality produce.`);
-      return { flagged: true, reason: "Validator is approving poor-quality produce too frequently." };
-    }
-    return { flagged: false };
+    console.log(`Validator ${validatorId} reputation updated to ${this.validators[validatorId]?.reputation}`);
   }
   
   getActiveValidators() {
@@ -69,7 +82,7 @@ class ValidatorPool {
 
   syncValidatorPool(newPool) {
     this.validators = { ...newPool };
-    console.log(`🔄 Validator Pool Synchronized with Network.`);
+    console.log(`Validator Pool Synchronized with Network.`);
   }
 }
 

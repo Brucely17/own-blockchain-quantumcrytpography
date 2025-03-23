@@ -32,9 +32,9 @@ class Wallet {
       throw new Error('❌ ERROR: Not enough balance to stake as a validator.');
     }
     this.stake = VALIDATOR_STAKE_AMOUNT;
-    this.balance -= VALIDATOR_STAKE_AMOUNT; // Reduce balance when staking
+    this.balance -= VALIDATOR_STAKE_AMOUNT;
     this.isValidator = true;
-    console.log(`✅ Validator ${this.publicKey} has staked ${VALIDATOR_STAKE_AMOUNT} tokens. New balance: ${this.balance}`);
+    console.log(`✅ Validator ${this.publicKey} staked ${VALIDATOR_STAKE_AMOUNT} tokens. New balance: ${this.balance}`);
   }
 
   withdrawStake() {
@@ -44,7 +44,7 @@ class Wallet {
     this.balance += this.stake;
     this.stake = 0;
     this.isValidator = false;
-    console.log(`❌ Validator ${this.publicKey} has withdrawn their stake. New balance: ${this.balance}`);
+    console.log(`❌ Validator ${this.publicKey} withdrew their stake. New balance: ${this.balance}`);
   }
 
   static calculateBalance({ chain, address }) {
@@ -63,6 +63,7 @@ class Wallet {
       }
       if (hasConductedTransaction) break;
     }
+    // Include starting balance and also staked tokens (if any, not spent).
     return hasConductedTransaction ? outputsTotal : STARTING_BALANCE + outputsTotal;
   }
 
@@ -72,6 +73,7 @@ class Wallet {
 }
 
 module.exports = Wallet;
+
 
 // const Transaction = require('./transaction');
 // const { STARTING_BALANCE } = require('../config');

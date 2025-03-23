@@ -1,3 +1,4 @@
+// wallet/transaction-pool.js
 const QualityCheck = require('../validators/quality-algorithm');
 
 class TransactionPool {
@@ -24,40 +25,34 @@ class TransactionPool {
     return Object.values(this.transactionMap).find(tx => tx.input.address === inputAddress);
   }
 
+  // Return only transactions that have a final qualityDecision.
   validTransactions() {
     return Object.values(this.transactionMap).filter(transaction => {
-      // Use the actual validator pool count if available; here default to 3.
-      const defaultValidatorCount = 3;
-      const approvals = Object.keys(transaction.validatorApprovals || {}).length;
-      return (
-        approvals >= Math.ceil(defaultValidatorCount / 2) ||
-        transaction.qualityDecision === "AUTO_APPROVE" ||
-        this.validatorStakedTransactions[transaction.id]
-      );
+      return transaction.qualityDecision === "APPROVED" || transaction.qualityDecision === "AI_APPROVED";
     });
   }
 
   rejectTransaction(transaction) {
     this.rejectedTransactions[transaction.id] = transaction;
     delete this.transactionMap[transaction.id];
-    console.log(`❌ Transaction ${transaction.id} rejected & stored for AI review.`);
+    console.log(`Transaction ${transaction.id} rejected & stored for AI review.`);
   }
 
   stakeValidatorTransaction(transactionId, validatorId) {
     if (!this.rejectedTransactions[transactionId]) {
-      console.log(`❌ ERROR: Transaction ${transactionId} not found in rejected list.`);
+      console.log(`Transaction ${transactionId} not found in rejected list.`);
       return;
     }
     this.validatorStakedTransactions[transactionId] = validatorId;
     this.setTransaction(this.rejectedTransactions[transactionId]);
     delete this.rejectedTransactions[transactionId];
-    console.log(`🔒 Validator ${validatorId} staked approval for Transaction ${transactionId}`);
+    console.log(`Validator ${validatorId} staked approval for Transaction ${transactionId}`);
   }
 
   revalidateRejectedTransactions(qualityCheck) {
     Object.values(this.rejectedTransactions).forEach(transaction => {
       if (this.validatorStakedTransactions[transaction.id]) {
-        console.log(`✅ Validator override: Transaction ${transaction.id} approved.`);
+        console.log(`Validator override: Transaction ${transaction.id} approved.`);
         this.setTransaction(transaction);
         delete this.rejectedTransactions[transaction.id];
         return;
@@ -69,11 +64,11 @@ class TransactionPool {
         []
       );
       if (qualityResult.decision === "AUTO_APPROVE") {
-        console.log(`🤖 AI Auto-Approved Transaction ${transaction.id}`);
+        console.log(`AI Auto-Approved Transaction ${transaction.id}`);
         this.setTransaction(transaction);
         delete this.rejectedTransactions[transaction.id];
       } else {
-        console.log(`❌ Transaction ${transaction.id} remains rejected.`);
+        console.log(`Transaction ${transaction.id} remains rejected.`);
       }
     });
   }
@@ -91,6 +86,7 @@ class TransactionPool {
 }
 
 module.exports = TransactionPool;
+
 
 // const Transaction = require('./transaction');
 

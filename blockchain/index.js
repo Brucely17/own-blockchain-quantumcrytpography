@@ -1,7 +1,7 @@
 const Block = require('./block');
 const MerkleTree = require('../TrieRoot/merkleeTree');
 const Transaction = require('../wallet/transaction');
-const Wallet = require('../wallet');
+const Wallet = require('../wallet/index');
 const { REWARD_INPUT, MINING_REWARD } = require('../config');
 const { cryptoHash } = require('../util');
 const QualityCheck = require('../validators/quality-algorithm');
@@ -13,14 +13,9 @@ class Blockchain {
   }
 
   addBlock({ data }) {
-    // Filter transactions that meet the condition of at least 50% approvals or auto-approval.
+    // Now filter transactions based on finalized qualityDecision.
     const validTransactions = data.filter(tx => {
-      const defaultValidatorCount = 3;
-      const approvals = Object.keys(tx.validatorApprovals || {}).length;
-      return (
-        approvals >= Math.ceil(defaultValidatorCount / 2) ||
-        tx.qualityDecision === "AUTO_APPROVE"
-      );
+      return tx.qualityDecision === "APPROVED" || tx.qualityDecision === "AI_APPROVED";
     });
 
     if (validTransactions.length === 0) {
@@ -50,23 +45,28 @@ class Blockchain {
 
   static isValidChain(chain) {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
+
     for (let i = 1; i < chain.length; i++) {
       const { timestamp, lastHash, hash, nonce, difficulty, merkleRoot } = chain[i];
       const actualLastHash = chain[i - 1].hash;
+
       if (lastHash !== actualLastHash) return false;
       if (Math.abs(chain[i - 1].difficulty - difficulty) > 1) return false;
       if (!Block.validateMerkleRoot(chain[i])) {
         console.error('❌ Invalid Merkle Root for transactions in block');
         return false;
       }
+
       const validatedHash = cryptoHash(timestamp, lastHash, nonce, difficulty, merkleRoot);
       if (hash !== validatedHash) return false;
     }
+
     const chainMerkleTree = new MerkleTree(chain.map(block => block.hash));
     if (chainMerkleTree.root !== this.merkleRoot) {
       console.error('❌ Invalid overall Merkle Root for blockchain');
       return false;
     }
+
     return true;
   }
 
@@ -75,14 +75,17 @@ class Blockchain {
       console.error('❌ The incoming chain must be longer');
       return;
     }
+
     if (!Blockchain.isValidChain(newChain)) {
       console.error('❌ The incoming chain must be valid');
       return;
     }
+
     if (validateTransactions && !this.validTransactionData({ chain: newChain })) {
       console.error('❌ The incoming chain has invalid transaction data');
       return;
     }
+
     if (onSuccess) onSuccess();
     console.log('🔄 Replacing chain with new valid chain');
     this.chain = newChain;
@@ -90,10 +93,12 @@ class Blockchain {
   }
 
   validTransactionData({ chain }) {
+    // (Existing logic for checking each block's transactions.)
     for (let i = 1; i < chain.length; i++) {
       const block = chain[i];
       const transactionSet = new Set();
       let rewardTransactionCount = 0;
+
       for (let transaction of block.data) {
         if (transaction.input.address === REWARD_INPUT.address) {
           rewardTransactionCount += 1;
@@ -110,14 +115,17 @@ class Blockchain {
             console.error('❌ Invalid transaction');
             return false;
           }
+
           const trueBalance = Wallet.calculateBalance({
             chain: this.chain,
             address: transaction.input.address
           });
+
           if (transaction.input.amount !== trueBalance) {
             console.error('❌ Invalid input amount');
             return false;
           }
+
           if (transactionSet.has(transaction)) {
             console.error('❌ Duplicate transaction detected in block');
             return false;
@@ -127,6 +135,7 @@ class Blockchain {
         }
       }
     }
+
     return true;
   }
 
@@ -134,10 +143,10 @@ class Blockchain {
     for (let i = 1; i < this.chain.length; i++) {
       const block = this.chain[i];
       for (let transaction of block.data) {
-        if (!transaction.validatorApprovals || Object.keys(transaction.validatorApprovals).length < 2) {
+        if (!transaction.validatorApprovals || Object.keys(transaction.validatorApprovals).length < 1) {
           const qualityResult = QualityCheck.evaluateQuality(transaction.iotData, transaction.sampleData, transaction.input.address, []);
           if (qualityResult.decision === "AUTO_APPROVE") {
-            console.log(`🤖 AI has auto-approved transaction ${transaction.id}`);
+            console.log(`🤖 AI auto-approved transaction ${transaction.id}`);
             transaction.qualityDecision = "AUTO_APPROVE";
           } else {
             console.log(`❌ Transaction ${transaction.id} remains rejected.`);
@@ -150,6 +159,7 @@ class Blockchain {
 }
 
 module.exports = Blockchain;
+
 
 
 // const Block = require('./block');
