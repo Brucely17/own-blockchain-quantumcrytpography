@@ -1,14 +1,30 @@
-
 :root {
   --muted-gray: #a9a8ac;
   --bright-purple: #9a5fe5;
   --white: #ffffff;
   --deep-black: #0e0c15;
+  --light-gray: #f4f4f4;
 }
 
+body {
+  background: var(--deep-black);
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--white);
+}
 
-.logo {
-  width: 300px;
-  height: 300px;
+a {
+  color: var(--bright-purple);
+  text-decoration: none;
+}
 
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
 }

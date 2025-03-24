@@ -1,0 +1,52 @@
+/* WalletInfo.css */
+.wallet-info-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(18px);
+    border-radius: 15px;
+    padding: 20px 30px;
+    margin: 30px auto;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+  }
+  
+  .wallet-info-container:hover {
+    transform: scale(1.02);
+  }
+  
+  .wallet-info-container h3 {
+    font-size: 2.5rem;
+    color: var(--bright-purple);
+    margin-bottom: 10px;
+  }
+    
+  .wallet-info-container h2 {
+    font-size: 2rem;
+    color: var(--bright-purple);
+    margin-bottom: 10px;
+  }
+  
+  .wallet-info-container p {
+    font-size: 1.8rem;
+    margin: 8px 0;
+  }
+  
+  .wallet-info-container .public-key {
+    font-size: 0.9rem;
+    color: var(--white);
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    border-radius: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    filter: blur(4px);
+    transition: filter 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .wallet-info-container .public-key:hover {
+    filter: none;
+  }
+  

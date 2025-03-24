@@ -53,10 +53,12 @@ const Login = () => {
 
       {responseMessage && (
         <div className="response">
-          <p>{responseMessage}</p>
-          {walletAddress && <p>Your wallet address: {walletAddress}</p>}
+          <h3 >{responseMessage}</h3>
+          {walletAddress && <h4><strong>Your wallet address:</strong> </h4>}
+          <br></br>
+          <h5>{walletAddress}</h5>
           {walletAddress && (
-            <p>
+            <p className="linkButton">
               <Link to={`/${role}`}>Go to Dashboard</Link>
             </p>
           )}

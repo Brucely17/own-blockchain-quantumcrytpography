@@ -52,7 +52,7 @@ app.post('/api/register', async (req, res) => {
  */
 app.get('/api/wallet-info', (req, res) => {
   const address = wallet.publicKey;
-  const balance = Wallet.calculateBalance({ chain: blockchain.chain, address });
+  const balance = Wallet.calculateBalance({ chain: blockchain.chain, address,localBalance: wallet.balance });
   res.json({ address, balance, staked: wallet.stake });
 });
 

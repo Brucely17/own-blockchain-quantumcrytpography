@@ -84,53 +84,17 @@ import { Link } from 'react-router-dom';
 import logo from '../assets/logo-removebg-preview.png';
 import ClipBoardCopy from './ClipBoardCopy';
 import "./App.css"
+import Login from '../frontend/Login';
 
 class App extends Component {
-  state = { walletInfo: {}, selectedLink: null };
-
-  componentDidMount() {
-    fetch(`${document.location.origin}/api/wallet-info`)
-      .then((response) => response.json())
-      .then((json) => this.setState({ walletInfo: json }));
-  }
-  
+ 
 
   render() {
-    const { address, balance } = this.state.walletInfo;
     
-    const bardLinks = [
-      { title: 'Blocks', to: '/blocks' },
-      { title: 'MerkleTree', to: '/merkletree' },
-      { title: 'Conduct a Transaction', to: '/conduct-transaction' },
-      { title: 'Transaction Pool', to: '/transaction-pool' },
-      {title:"FileSystem",to:"/filesys"}
-    ];
 
     return (
       <div className="App">
-        <>
-          <img src={logo} alt="Logo" style={{ width: '100px' }} />
-          <h1 style={{color:"aliceblue"}}>Blockchain App</h1>
-        
-          </>
-        <div className="bard-container">
-          {bardLinks.map((link, index) => (
-            <Link to={link.to} className="bard-link">
-            <div key={index} className="custom-bard">
-              <h3>{link.title}</h3>
-
-              
-            </div>
-            </Link>
-          ))}
-        </div>
-
-        <div className="WalletInfo">
-          <h3>Wallet Info</h3>
-          <h4 style={{color:"grey"}}>Address: {address}</h4>
-          <ClipBoardCopy text={address} />
-          <h4 style={{color:"grey"}}>Balance: {balance}</h4>
-        </div>
+        <Login/>
       </div>
     );
   }

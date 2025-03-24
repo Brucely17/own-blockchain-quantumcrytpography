@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 // import './Dashboard.css'; // Adjust if you have a separate CSS file for dashboards
+import WalletInfo from './Wallet';
 import './ValidatorDashBoard.css';
 
 const ValidatorDashboard = () => {
@@ -9,6 +10,7 @@ const ValidatorDashboard = () => {
   const [sampleData, setSampleData] = useState({ temperature: '', humidity: '', freshness: '' });
   const [responseMessage, setResponseMessage] = useState('');
   const [validatorAddress, setValidatorAddress] = useState('');
+   const [walletInfo, setWalletInfo] = useState({});
 
   // Fetch wallet info on mount to get validatorAddress
   useEffect(() => {
@@ -17,6 +19,7 @@ const ValidatorDashboard = () => {
         const res = await fetch(`${document.location.origin}/api/wallet-info`);
         const data = await res.json();
         setValidatorAddress(data.address);
+        setWalletInfo(data);
       } catch (err) {
         console.error("Error fetching wallet info:", err);
       }
@@ -74,7 +77,12 @@ const ValidatorDashboard = () => {
   return (
     <div className="dashboard-container">
       <h2>Validator Dashboard</h2>
-      <p>Your Validator Address: {validatorAddress}</p>
+      <WalletInfo
+        address={walletInfo.address}
+        balance={walletInfo.balance}
+        staked={walletInfo.staked}
+      />
+      
       {responseMessage && <p>{responseMessage}</p>}
       <h3>Pending Transactions for Validation</h3>
       {transactions.length === 0 ? (

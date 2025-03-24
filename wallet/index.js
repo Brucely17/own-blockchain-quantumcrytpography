@@ -47,24 +47,23 @@ class Wallet {
     console.log(`❌ Validator ${this.publicKey} withdrew their stake. New balance: ${this.balance}`);
   }
 
-  static calculateBalance({ chain, address }) {
-    let hasConductedTransaction = false;
+  static calculateBalance({ chain, address, localBalance }) {
+    let hasTx = false;
     let outputsTotal = 0;
     for (let i = chain.length - 1; i > 0; i--) {
       const block = chain[i];
       for (let transaction of block.data) {
         if (transaction.input.address === address) {
-          hasConductedTransaction = true;
+          hasTx = true;
         }
         const addressOutput = transaction.outputMap[address];
         if (addressOutput) {
           outputsTotal += addressOutput;
         }
       }
-      if (hasConductedTransaction) break;
+      if (hasTx) break;
     }
-    // Include starting balance and also staked tokens (if any, not spent).
-    return hasConductedTransaction ? outputsTotal : STARTING_BALANCE + outputsTotal;
+    return hasTx ? outputsTotal : localBalance;
   }
 
   isActiveValidator() {

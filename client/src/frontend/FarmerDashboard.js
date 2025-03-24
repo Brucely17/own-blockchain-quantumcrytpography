@@ -1,6 +1,7 @@
 // src/components/FarmerDashboard.js
 import React, { useState, useEffect } from 'react';
 import './FarmerDashBoard.css';
+import WalletInfo from './Wallet';
 const FarmerDashboard = () => {
   const [walletInfo, setWalletInfo] = useState({});
   const [produceData, setProduceData] = useState({ pricePerKg: '', quantity: '', temperature: '', humidity: '', freshness: '' });
@@ -52,9 +53,11 @@ const FarmerDashboard = () => {
   return (
     <div className="dashboard-container">
       <h2>Farmer Dashboard</h2>
-      <p>Your Wallet Address: {walletInfo.address}</p>
-      <p>Balance: {walletInfo.balance}</p>
-      <p>Staked Tokens: {walletInfo.staked}</p>
+      <WalletInfo
+        address={walletInfo.address}
+        balance={walletInfo.balance}
+        staked={walletInfo.staked}
+      />
       
       <h3>Submit Produce Data</h3>
       <form onSubmit={handleSubmitProduce}>
