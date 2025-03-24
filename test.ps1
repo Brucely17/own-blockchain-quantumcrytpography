@@ -16,12 +16,12 @@
 #>
 
 param(
-    [int]$ValidatorPort1 = 3827,
-    [int]$ValidatorPort2 = 3766,
-    [int]$FarmerPort = 3316,
-    [int]$CustomerPort = 3093,
-    [int]$ValidatorPort3=3928,
-    [int]$ValidatorPort4=3323
+    [int]$ValidatorPort1 = 3722,
+    [int]$ValidatorPort2 = 3933,
+    [int]$FarmerPort = 3290,
+    [int]$CustomerPort = 3185,
+    [int]$ValidatorPort3=3215,
+    [int]$ValidatorPort4=3892
 
 )
 Start-Sleep -Seconds 10

@@ -7,6 +7,11 @@ async function runTests() {
   
     const data = await IPFSHandler.getJSON(ipfsHash);
     console.log("📥 Retrieved IoT Data:", data);
+
+    const newData = await IPFSHandler.getFile(ipfsHash);
+    console.log("📥 Retrieved IoT Data:", newData);
+
+
   }
   
   runTests();

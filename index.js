@@ -92,6 +92,19 @@ app.post('/api/submit-produce', async (req, res) => {
   }
 });
 
+
+app.get('/api/ipfs/:hash', async (req, res) => {
+    try {
+      const { hash } = req.params;
+      const data = await IPFS.getJSON(hash);
+      res.json(data);
+    } catch (err) {
+      console.error("Error retrieving IPFS data:", err);
+      res.status(500).json({ error: "Failed to retrieve IPFS data" });
+    }
+  });
+  
+
 /**
  * Validator Validates Produce.
  */
@@ -194,6 +207,10 @@ const syncWithRootState = () => {
     }
   });
 };
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
+});
 
 let PEER_PORT;
 if (process.env.GENERATE_PEER_PORT === 'true') {

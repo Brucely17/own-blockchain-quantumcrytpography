@@ -61,6 +61,8 @@ class Transaction {
     // Retrieve IoT and sample data from IPFS if they are stored as hash strings.
     let iotDataObj = this.iotData;
     let sampleDataObj = this.sampleData;
+    console.log(iotDataObj,sampleDataObj);
+    
     if (typeof this.iotData === 'string') {
       try {
         iotDataObj = await IPFS.getJSON(this.iotData);

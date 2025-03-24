@@ -1,0 +1,15 @@
+/* CustomerBlockchain.css */
+.customer-blockchain {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+    color: var(--white);
+  }
+  
+  .customer-blockchain h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: var(--bright-purple);
+  }
+  

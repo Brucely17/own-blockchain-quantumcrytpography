@@ -1,8 +1,10 @@
+// validators/quality-algorithm.js
 const cryptoHash = require('../util/crypto-hash');
 
 class QualityCheck {
   static evaluateQuality(iotData, sampleData, farmerId, pastTransactions = []) {
     if (!iotData || !sampleData) {
+      console.error("Missing IoT or sample data.");
       return { qualityScore: 0, decision: "REJECT", reason: "Missing IoT or sample data." };
     }
 
@@ -15,13 +17,20 @@ class QualityCheck {
     let weightedScore = 0;
     for (let key in weightage) {
       if (iotData[key] !== undefined && sampleData[key] !== undefined) {
-        const difference = Math.abs(iotData[key] - sampleData[key]);
+        const iotValue = Number(iotData[key]);
+        const sampleValue = Number(sampleData[key]);
+        const difference = Math.abs(iotValue - sampleValue);
         const matchScore = Math.max(0, 100 - (difference * 2));
         weightedScore += matchScore * weightage[key];
+        console.log(`Key: ${key}, IoT: ${iotValue}, Sample: ${sampleValue}, Diff: ${difference}, MatchScore: ${matchScore}`);
+      } else {
+        console.warn(`Key ${key} missing in one of the datasets.`);
       }
     }
 
     const qualityScore = Math.round(weightedScore);
+    console.log(`Computed weightedScore: ${weightedScore}, qualityScore: ${qualityScore}`);
+    
     const fraudCheck = this.detectFarmerFraud(farmerId, pastTransactions);
     let decision, reason;
     if (fraudCheck.flagged) {
@@ -37,7 +46,7 @@ class QualityCheck {
       decision = "REJECT";
       reason = "Significant mismatch between IoT and sample data.";
     }
-    console.log(`📊 Quality Check for ${farmerId}: Score = ${qualityScore}, Decision = ${decision}, Reason: ${reason}`);
+    console.log(`Quality Check Result: Score=${qualityScore}, Decision=${decision}, Reason=${reason}`);
     return { qualityScore, decision, reason };
   }
 
@@ -49,7 +58,7 @@ class QualityCheck {
     let rejectedCount = pastTransactions.filter(tx => tx.qualityDecision === "REJECT").length;
     let totalCount = pastTransactions.length;
     if (totalCount > 5 && (rejectedCount / totalCount) > 0.4) {
-      console.warn(`⚠️ Fraud Alert: Farmer ${farmerId} has a high rejection rate.`);
+      console.warn(`Fraud Alert: Farmer ${farmerId} has a high rejection rate.`);
       return { flagged: true, reason: "Farmer has a high rejection rate." };
     }
     return { flagged: false };
@@ -61,7 +70,7 @@ class QualityCheck {
     ).length;
     let totalValidations = pastValidations.length;
     if (totalValidations > 10 && (approvedLowQuality / totalValidations) > 0.3) {
-      console.warn(`⚠️ Validator ${validatorId} flagged for approving low-quality produce.`);
+      console.warn(`Validator ${validatorId} flagged for approving low-quality produce.`);
       return { flagged: true, reason: "Validator is approving poor-quality produce too frequently." };
     }
     return { flagged: false };
@@ -69,7 +78,6 @@ class QualityCheck {
 }
 
 module.exports = QualityCheck;
-
 
 // const cryptoHash = require('../util/crypto-hash');
 

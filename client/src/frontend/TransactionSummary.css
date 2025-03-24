@@ -1,0 +1,44 @@
+/* TransactionSummary.css */
+.transaction-summary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--muted-gray);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+    transition: background 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .summary-header p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+  
+  .summary-details {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 13px;
+    text-align: left;
+  }
+  
+  .summary-details p {
+    margin: 3px 0;
+  }
+  
+  .summary-details .close-btn {
+    background-color: var(--bright-purple);
+    border: none;
+    border-radius: 5px;
+    padding: 5px 8px;
+    color: var(--white);
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s ease;
+  }
+  
+  .summary-details .close-btn:hover {
+    background-color: var(--muted-gray);
+  }
+  

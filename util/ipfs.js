@@ -24,8 +24,17 @@ class IPFSHandler {
       for await (const chunk of stream) {
         data += chunk.toString();
       }
-      console.log(`📥 Retrieved JSON Data from IPFS: ${ipfsHash}`);
-      return JSON.parse(data);
+      console.log(`📥 Raw data retrieved from IPFS (${ipfsHash}): ${data}`);
+      data = data.trim();
+      // If the data is a comma-separated list of numbers, convert it.
+      if (/^(\d+,)+\d+$/.test(data)) {
+        const charArray = data.split(',').map(num => String.fromCharCode(Number(num)));
+        const jsonString = charArray.join('');
+        console.log(`Converted JSON string: ${jsonString}`);
+        return JSON.parse(jsonString);
+      } else {
+        return JSON.parse(data);
+      }
     } catch (error) {
       console.error("❌ IPFS JSON Fetch Error:", error);
       throw error;
@@ -85,7 +94,6 @@ class IPFSHandler {
 }
 
 module.exports = IPFSHandler;
-
 
 
 // const ipfsPromise = (async () => {
