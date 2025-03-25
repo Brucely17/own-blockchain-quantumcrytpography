@@ -20,6 +20,25 @@ const TransactionSummary = ({ transaction }) => {
 
   const toggleDetails = () => setShowDetails(!showDetails);
 
+  // Helper to safely render an object
+  const renderObject = (obj) => {
+    if (!obj) return null;
+    return (
+      <ul>
+        {Object.entries(obj).map(([key, value]) => (
+          <li key={key}>
+            <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  // Ensure qualityScore is rendered as a number (or string)
+  const qualityScoreDisplay = typeof transaction.qualityScore === 'number'
+    ? transaction.qualityScore
+    : JSON.stringify(transaction.qualityScore);
+
   return (
     <div className="transaction-summary">
       <div className="summary-header" onClick={toggleDetails}>
@@ -30,25 +49,18 @@ const TransactionSummary = ({ transaction }) => {
           <span>Price/Kg:</span> {transaction.pricePerKg} | <span>Qty:</span> {transaction.quantity}
         </p>
         <p>
-          <span>Quality:</span> {transaction.qualityScore} ({transaction.qualityDecision})
+          <span>Quality:</span> {qualityScoreDisplay} ({transaction.qualityDecision})
         </p>
       </div>
       {showDetails && (
         <div className="summary-details">
-          <p><strong>Input Address:</strong> {transaction.input.address}</p>
-          <p><strong>Output Map:</strong> {JSON.stringify(transaction.outputMap)}</p>
-          <p><strong>Validator Approvals:</strong> {JSON.stringify(transaction.validatorApprovals)}</p>
+          <p><strong>Input Address:</strong> {transaction.input && transaction.input.address}</p>
+          <p><strong>Output Map:</strong> {transaction.outputMap ? JSON.stringify(transaction.outputMap) : 'N/A'}</p>
+          <p><strong>Validator Approvals:</strong> {transaction.validatorApprovals ? JSON.stringify(transaction.validatorApprovals) : 'N/A'}</p>
           <p><strong>IoT Data:</strong></p>
-          {parsedIotData ? (
-            <ul>
-              {Object.entries(parsedIotData).map(([key, value]) => (
-                <li key={key}><strong>{key}:</strong> {value}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>Loading IoT data...</p>
-          )}
-          <p><strong>Sample Data:</strong> {transaction.sampleData}</p>
+          {parsedIotData ? renderObject(parsedIotData) : <p>Loading IoT data...</p>}
+          <p><strong>Sample Data:</strong></p>
+          {transaction.sampleData ? renderObject(transaction.sampleData) : <p>N/A</p>}
           <button onClick={toggleDetails} className="close-btn">Close</button>
         </div>
       )}

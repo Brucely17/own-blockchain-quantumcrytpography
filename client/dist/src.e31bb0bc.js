@@ -34867,6 +34867,7 @@ var _react = _interopRequireWildcard(require("react"));
 require("./TransactionSummary.css");
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -34901,21 +34902,30 @@ var TransactionSummary = function TransactionSummary(_ref) {
   var toggleDetails = function toggleDetails() {
     return setShowDetails(!showDetails);
   };
+
+  // Helper to safely render an object
+  var renderObject = function renderObject(obj) {
+    if (!obj) return null;
+    return /*#__PURE__*/_react.default.createElement("ul", null, Object.entries(obj).map(function (_ref2) {
+      var _ref3 = _slicedToArray(_ref2, 2),
+        key = _ref3[0],
+        value = _ref3[1];
+      return /*#__PURE__*/_react.default.createElement("li", {
+        key: key
+      }, /*#__PURE__*/_react.default.createElement("strong", null, key, ":"), " ", _typeof(value) === 'object' ? JSON.stringify(value) : value);
+    }));
+  };
+
+  // Ensure qualityScore is rendered as a number (or string)
+  var qualityScoreDisplay = typeof transaction.qualityScore === 'number' ? transaction.qualityScore : JSON.stringify(transaction.qualityScore);
   return /*#__PURE__*/_react.default.createElement("div", {
     className: "transaction-summary"
   }, /*#__PURE__*/_react.default.createElement("div", {
     className: "summary-header",
     onClick: toggleDetails
-  }, /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "ID:"), " ", transaction.id.slice(0, 8), "..."), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("span", null, "Price/Kg:"), " ", transaction.pricePerKg, " | ", /*#__PURE__*/_react.default.createElement("span", null, "Qty:"), " ", transaction.quantity), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("span", null, "Quality:"), " ", transaction.qualityScore, " (", transaction.qualityDecision, ")")), showDetails && /*#__PURE__*/_react.default.createElement("div", {
+  }, /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "ID:"), " ", transaction.id.slice(0, 8), "..."), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("span", null, "Price/Kg:"), " ", transaction.pricePerKg, " | ", /*#__PURE__*/_react.default.createElement("span", null, "Qty:"), " ", transaction.quantity), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("span", null, "Quality:"), " ", qualityScoreDisplay, " (", transaction.qualityDecision, ")")), showDetails && /*#__PURE__*/_react.default.createElement("div", {
     className: "summary-details"
-  }, /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Input Address:"), " ", transaction.input.address), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Output Map:"), " ", JSON.stringify(transaction.outputMap)), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Validator Approvals:"), " ", JSON.stringify(transaction.validatorApprovals)), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "IoT Data:")), parsedIotData ? /*#__PURE__*/_react.default.createElement("ul", null, Object.entries(parsedIotData).map(function (_ref2) {
-    var _ref3 = _slicedToArray(_ref2, 2),
-      key = _ref3[0],
-      value = _ref3[1];
-    return /*#__PURE__*/_react.default.createElement("li", {
-      key: key
-    }, /*#__PURE__*/_react.default.createElement("strong", null, key, ":"), " ", value);
-  })) : /*#__PURE__*/_react.default.createElement("p", null, "Loading IoT data..."), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Sample Data:"), " ", transaction.sampleData), /*#__PURE__*/_react.default.createElement("button", {
+  }, /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Input Address:"), " ", transaction.input && transaction.input.address), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Output Map:"), " ", transaction.outputMap ? JSON.stringify(transaction.outputMap) : 'N/A'), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Validator Approvals:"), " ", transaction.validatorApprovals ? JSON.stringify(transaction.validatorApprovals) : 'N/A'), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "IoT Data:")), parsedIotData ? renderObject(parsedIotData) : /*#__PURE__*/_react.default.createElement("p", null, "Loading IoT data..."), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Sample Data:")), transaction.sampleData ? renderObject(transaction.sampleData) : /*#__PURE__*/_react.default.createElement("p", null, "N/A"), /*#__PURE__*/_react.default.createElement("button", {
     onClick: toggleDetails,
     className: "close-btn"
   }, "Close")));
@@ -35159,7 +35169,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "44029" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42409" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

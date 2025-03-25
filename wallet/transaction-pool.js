@@ -63,6 +63,7 @@ class TransactionPool {
         transaction.input.address,
         []
       );
+      console.log(qualityResult, " transaction pool code")
       if (qualityResult.decision === "AUTO_APPROVE") {
         console.log(`AI Auto-Approved Transaction ${transaction.id}`);
         this.setTransaction(transaction);

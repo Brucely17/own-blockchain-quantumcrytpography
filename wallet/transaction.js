@@ -58,10 +58,9 @@ class Transaction {
       return;
     }
     
-    // Retrieve IoT and sample data from IPFS if they are stored as hash strings.
+    // Retrieve IoT and sample data from IPFS if stored as hash strings.
     let iotDataObj = this.iotData;
     let sampleDataObj = this.sampleData;
-    console.log(iotDataObj,sampleDataObj);
     
     if (typeof this.iotData === 'string') {
       try {
@@ -85,14 +84,16 @@ class Transaction {
     
     if (approvals >= Math.ceil(totalAssigned / 2)) {
       console.log(`Transaction ${this.id} approved by majority of validators`);
-      // Even if validators approve, run quality evaluation to compute a quality score.
-      const aiResult = QualityCheck.evaluateQuality(iotDataObj, sampleDataObj, this.input.address);
+      // Await the quality evaluation result.
+      const aiResult = await QualityCheck.evaluateQuality(iotDataObj, sampleDataObj, this.input.address);
       this.qualityScore = aiResult.qualityScore;
+      console.log(this.qualityScore, " transaction code1");
       this.qualityDecision = "APPROVED";
     } else {
       console.log(`Insufficient approvals for transaction ${this.id}. Running AI Quality Check...`);
-      const aiDecision = QualityCheck.evaluateQuality(iotDataObj, sampleDataObj, this.input.address);
+      const aiDecision = await QualityCheck.evaluateQuality(iotDataObj, sampleDataObj, this.input.address);
       this.qualityScore = aiDecision.qualityScore;
+      console.log(this.qualityScore, " transaction code");
       if (aiDecision.decision === "AUTO_APPROVE") {
         console.log(`AI auto-approved transaction ${this.id}`);
         this.qualityDecision = "AI_APPROVED";
@@ -102,6 +103,7 @@ class Transaction {
       }
     }
   }
+  
 
   static validTransaction(transaction) {
     const { input: { address, amount, signature }, outputMap } = transaction;

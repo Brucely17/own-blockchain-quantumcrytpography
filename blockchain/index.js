@@ -145,6 +145,7 @@ class Blockchain {
       for (let transaction of block.data) {
         if (!transaction.validatorApprovals || Object.keys(transaction.validatorApprovals).length < 1) {
           const qualityResult = QualityCheck.evaluateQuality(transaction.iotData, transaction.sampleData, transaction.input.address, []);
+          console.log(qualityResult, " Blockchain code")
           if (qualityResult.decision === "AUTO_APPROVE") {
             console.log(`🤖 AI auto-approved transaction ${transaction.id}`);
             transaction.qualityDecision = "AUTO_APPROVE";
