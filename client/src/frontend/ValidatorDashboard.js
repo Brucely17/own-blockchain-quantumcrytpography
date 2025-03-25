@@ -1,33 +1,33 @@
 // src/components/ValidatorDashboard.js
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-// import './Dashboard.css'; // Adjust if you have a separate CSS file for dashboards
-import WalletInfo from './Wallet';
-import './ValidatorDashBoard.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import "./ValidatorDashboard.css";
+import WalletInfo from "./Wallet";
 
 const ValidatorDashboard = () => {
   const [transactions, setTransactions] = useState([]);
-  const [sampleData, setSampleData] = useState({ temperature: '', humidity: '', freshness: '' });
-  const [responseMessage, setResponseMessage] = useState('');
-  const [validatorAddress, setValidatorAddress] = useState('');
-   const [walletInfo, setWalletInfo] = useState({});
+  const [sampleData, setSampleData] = useState(null); // Parsed CSV data for physical samples
+  const [validatorId, setValidatorId] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [responseMessage, setResponseMessage] = useState("");
+  const [walletInfo, setWalletInfo] = useState({});
 
-  // Fetch wallet info on mount to get validatorAddress
+  // Fetch validator's wallet info on mount
   useEffect(() => {
     const fetchWalletInfo = async () => {
       try {
         const res = await fetch(`${document.location.origin}/api/wallet-info`);
         const data = await res.json();
-        setValidatorAddress(data.address);
+        setValidatorId(data.address);
         setWalletInfo(data);
-      } catch (err) {
-        console.error("Error fetching wallet info:", err);
+      } catch (error) {
+        console.error("Error fetching wallet info:", error);
       }
     };
     fetchWalletInfo();
   }, []);
 
-  // Fetch transactions assigned to this validator, once validatorAddress is available.
+  // Fetch transactions assigned to this validator, once validatorId is available.
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -35,93 +35,131 @@ const ValidatorDashboard = () => {
         const data = await res.json();
         // Filter transactions that include the validator's public key in assignedValidators.
         const txList = Object.values(data).filter(
-          tx => tx.assignedValidators && tx.assignedValidators.includes(validatorAddress)
+          (tx) => tx.assignedValidators && tx.assignedValidators.includes(validatorId)
         );
         setTransactions(txList);
       } catch (err) {
         console.error("Error fetching transactions:", err);
       }
     };
-    if (validatorAddress) {
+    if (validatorId) {
       const interval = setInterval(fetchTransactions, 5000);
       return () => clearInterval(interval);
     }
-  }, [validatorAddress]);
+  }, [validatorId]);
 
-  const handleValidate = async (transactionId, approval) => {
-    setResponseMessage('');
-    const payload = {
-      validatorId: validatorAddress,
-      transactionId,
-      sampleData: {
-        temperature: Number(sampleData.temperature),
-        humidity: Number(sampleData.humidity),
-        freshness: Number(sampleData.freshness)
-      },
-      approval
-    };
-    try {
-      const res = await fetch(`${document.location.origin}/api/validate-produce`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      setResponseMessage(`Validation successful for transaction ${transactionId}`);
-      console.log('Validation response:', data);
-    } catch (err) {
-      setResponseMessage('Validation failed: ' + err.message);
+  // Handle CSV file selection for physical sample data
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(file);
+  };
+
+  // Parse CSV function (assumes first row headers, second row data)
+  const parseCSV = (csvText) => {
+    const lines = csvText.split("\n").filter((line) => line.trim() !== "");
+    if (lines.length < 2) return null;
+    const headers = lines[0].split(",").map((h) => h.trim());
+    const values = lines[1].split(",").map((v) => v.trim());
+    let dataObj = {};
+    headers.forEach((header, index) => {
+      dataObj[header] = isNaN(values[index]) ? values[index] : Number(values[index]);
+    });
+    return dataObj;
+  };
+
+  // Handle transaction validation (approve/reject)
+  const handleValidation = async (transactionId, approval) => {
+    if (!selectedFile) {
+      alert("Please upload sample CSV data before validation.");
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const csvText = event.target.result;
+      const parsedSampleData = parseCSV(csvText);
+      if (!parsedSampleData) {
+        setResponseMessage("Invalid CSV format for sample data.");
+        return;
+      }
+      setSampleData(parsedSampleData);
+      const payload = {
+        validatorId,
+        transactionId,
+        sampleData: parsedSampleData,
+        approval,
+      };
+      try {
+        const response = await fetch(`${document.location.origin}/api/validate-produce`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        setResponseMessage(`Transaction ${transactionId} has been ${approval}.`);
+      } catch (error) {
+        setResponseMessage("Error validating transaction: " + error.message);
+      }
+    };
+    reader.readAsText(selectedFile);
   };
 
   return (
-    <div className="dashboard-container">
-      <h2>Validator Dashboard</h2>
+    <div className="validator-container">
+      <h1>Validator Dashboard</h1>
       <WalletInfo
         address={walletInfo.address}
         balance={walletInfo.balance}
         staked={walletInfo.staked}
       />
+      <p>Validator ID: {validatorId || "Fetching..."}</p>
+      <p>Review and validate produce transactions.</p>
       
-      {responseMessage && <p>{responseMessage}</p>}
-      <h3>Pending Transactions for Validation</h3>
-      {transactions.length === 0 ? (
-        <p>No transactions assigned for validation.</p>
-      ) : (
-        <ul>
-          {transactions.map(tx => (
-            <li key={tx.id}>
-              <p>Transaction ID: {tx.id}</p>
-              <p>IoT Data: {tx.iotData}</p>
-              <div>
-                <input
-                  type="number"
-                  placeholder="Temperature"
-                  onChange={(e) =>
-                    setSampleData({ ...sampleData, temperature: e.target.value })
-                  }
-                />
-                <input
-                  type="number"
-                  placeholder="Humidity"
-                  onChange={(e) =>
-                    setSampleData({ ...sampleData, humidity: e.target.value })
-                  }
-                />
-                <input
-                  type="number"
-                  placeholder="Freshness"
-                  onChange={(e) =>
-                    setSampleData({ ...sampleData, freshness: e.target.value })
-                  }
-                />
-                <button onClick={() => handleValidate(tx.id, "APPROVED")}>Approve</button>
-                <button onClick={() => handleValidate(tx.id, "REJECTED")}>Reject</button>
+      <div className="transactions">
+        {transactions.length === 0 ? (
+          <p>No pending transactions.</p>
+        ) : (
+          transactions.map((tx) => (
+            <div key={tx.id} className="transaction-card">
+              <h3>Transaction ID: {tx.id}</h3>
+              <p>
+                <strong>Farmer ID:</strong> {tx.input.address}
+              </p>
+              <p>
+                <strong>Price per Kg:</strong> ${tx.pricePerKg} |{" "}
+                <strong>Quantity:</strong> {tx.quantity} kg
+              </p>
+              <p>
+                <strong>IoT Data:</strong>{" "}
+                <a
+                  href={`http://127.0.0.1:5001/webui/${tx.iotData}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on IPFS
+                </a>
+              </p>
+
+              <div className="csv-upload-section">
+  <p>Upload CSV file with physical sample data:</p>
+  {/* Associate the label with the hidden file input via htmlFor and id */}
+  <label htmlFor="csvInput">Choose CSV File</label>
+  <input 
+    id="csvInput" 
+    type="file" 
+    accept=".csv" 
+    onChange={handleFileChange} 
+  />
+</div>
+
+              <div className="validation-buttons">
+                <button onClick={() => handleValidation(tx.id, "APPROVED")}>Approve</button>
+                <button onClick={() => handleValidation(tx.id, "REJECTED")}>Reject</button>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+          ))
+        )}
+      </div>
+      {responseMessage && <p className="response">{responseMessage}</p>}
       <div>
         <Link to="/">Back to Home</Link>
       </div>
@@ -130,3 +168,122 @@ const ValidatorDashboard = () => {
 };
 
 export default ValidatorDashboard;
+
+
+// // src/components/ValidatorDashboard.js
+// import React, { useState, useEffect } from 'react';
+// import { Link } from 'react-router-dom';
+// // import './Dashboard.css'; // Adjust if you have a separate CSS file for dashboards
+// import WalletInfo from './Wallet';
+// import './ValidatorDashBoard.css';
+// import CSVUpload from './CSVUpload';
+
+// const ValidatorDashboard = () => {
+//   const [transactions, setTransactions] = useState([]);
+//   const [sampleData, setSampleData] = useState(null);
+//   const [responseMessage, setResponseMessage] = useState('');
+//   const [validatorAddress, setValidatorAddress] = useState('');
+//    const [walletInfo, setWalletInfo] = useState({});
+
+//   // Fetch wallet info on mount to get validatorAddress
+//   useEffect(() => {
+//     const fetchWalletInfo = async () => {
+//       try {
+//         const res = await fetch(`${document.location.origin}/api/wallet-info`);
+//         const data = await res.json();
+//         setValidatorAddress(data.address);
+//         setWalletInfo(data);
+//       } catch (err) {
+//         console.error("Error fetching wallet info:", err);
+//       }
+//     };
+//     fetchWalletInfo();
+//   }, []);
+
+//   // Fetch transactions assigned to this validator, once validatorAddress is available.
+//   useEffect(() => {
+//     const fetchTransactions = async () => {
+//       try {
+//         const res = await fetch(`${document.location.origin}/api/transaction-pool-map`);
+//         const data = await res.json();
+//         // Filter transactions that include the validator's public key in assignedValidators.
+//         const txList = Object.values(data).filter(
+//           tx => tx.assignedValidators && tx.assignedValidators.includes(validatorAddress)
+//         );
+//         setTransactions(txList);
+//       } catch (err) {
+//         console.error("Error fetching transactions:", err);
+//       }
+//     };
+//     if (validatorAddress) {
+//       const interval = setInterval(fetchTransactions, 5000);
+//       return () => clearInterval(interval);
+//     }
+//   }, [validatorAddress]);
+
+//   const handleValidate = async (transactionId, approval) => {
+//     setResponseMessage('');
+//     const payload = {
+//       validatorId: validatorAddress,
+//       transactionId,
+//       sampleData,
+//       approval
+//     };
+//     console.log(payload);
+//     try {
+//       const res = await fetch(`${document.location.origin}/api/validate-produce`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(payload)
+//       });
+//       const data = await res.json();
+//       setResponseMessage(`Validation successful for transaction ${transactionId}`);
+//       console.log('Validation response:', data);
+//     } catch (err) {
+//       setResponseMessage('Validation failed: ' + err.message);
+//     }
+//   };
+
+//   return (
+//     <div className="dashboard-container">
+//       <h2>Validator Dashboard</h2>
+//       <WalletInfo
+//         address={walletInfo.address}
+//         balance={walletInfo.balance}
+//         staked={walletInfo.staked}
+//       />
+      
+//       {responseMessage && <p>{responseMessage}</p>}
+//       <h3>Pending Transactions for Validation</h3>
+//       {transactions.length === 0 ? (
+//         <p>No transactions assigned for validation.</p>
+//       ) : (
+//         <ul>
+//           {transactions.map(tx => (
+//             <li key={tx.id}>
+//               <p>Transaction ID: {tx.id}</p>
+//               <p>IoT Data: {tx.iotData}</p>
+//               <div>
+//               <h3>Upload Physical Sample Data (CSV)</h3>
+//       <CSVUpload onDataParsed={data => setSampleData(data)} />
+//       {sampleData && (
+//         <div>
+//           <h4>Parsed Data:</h4>
+//           <pre>{JSON.stringify(sampleData, null, 2)}</pre>
+//         </div>
+//       )}
+//                 <button onClick={() => handleValidate(tx.id, "APPROVED")}>Approve</button>
+//                 <button onClick={() => handleValidate(tx.id, "REJECTED")}>Reject</button>
+//               </div>
+//             </li>
+//           ))}
+//         </ul>
+//       )}
+//       <div>
+//         <Link to="/">Back to Home</Link>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ValidatorDashboard;

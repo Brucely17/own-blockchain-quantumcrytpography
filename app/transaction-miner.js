@@ -1,6 +1,7 @@
 // app/transaction-miner.js
 const Transaction = require('../wallet/transaction');
 const QualityCheck = require('../validators/quality-algorithm');
+const { walletRegistry } = require('../wallet/walletRegistry'); 
 
 class TransactionMiner {
   constructor({ blockchain, transactionPool, wallet, pubsub, validatorPool, paymentProcessor }) {
@@ -24,7 +25,7 @@ class TransactionMiner {
     // Process payments for each transaction.
     validTransactions.forEach(tx => this.processPayments(tx));
     // Clear transactions that have been mined.
-    this.transactionPool.clear();
+    this.transactionPool.clearBlockchainTransactions({ chain:this.blockchain.chain });
   }
 
   processPayments(transaction) {
@@ -32,19 +33,60 @@ class TransactionMiner {
     const farmerShare = totalAmount * 0.85;
     const validatorShare = totalAmount * 0.10;
     const platformShare = totalAmount * 0.05;
+    const distributionDetails = {
+      transactionId: transaction.id,
+      totalAmount,
+      farmerShare,
+      validatorShare,
+      platformShare,
+      timestamp: Date.now()
+    };
+
+    // Sign the distribution details with the platform wallet.
+    // Assuming platformWallet has a sign method.
+    const platformWallet = walletRegistry["PLATFORM_WALLET"];
+    const signature = platformWallet ? platformWallet.sign(distributionDetails) : null;
+
     console.log(`Processing Payments for Transaction ${transaction.id}`);
-    console.log(`  - Farmer: ${farmerShare} tokens`);
-    console.log(`  - Validators: ${validatorShare} tokens`);
-    console.log(`  - Platform: ${platformShare} tokens`);
-    if (this.paymentProcessor) {
-      this.paymentProcessor.processPayment({
-        transactionId: transaction.id,
-        farmerId: transaction.input.address,
-        amount: farmerShare,
-        validatorPayments: this.calculateValidatorPayments(transaction, validatorShare),
-        platformAmount: platformShare
+    console.log(`  Total Amount: ${totalAmount}`);
+    console.log(`  Farmer Share: ${farmerShare}`);
+    console.log(`  Validator Share: ${validatorShare}`);
+    console.log(`  Platform Fee: ${platformShare}`);
+
+    // Update the farmer's wallet.
+    const farmerWallet = walletRegistry[transaction.input.address];
+    if (farmerWallet) {
+      farmerWallet.balance += farmerShare;
+      console.log(`Farmer (${farmerWallet.publicKey}) new balance: ${farmerWallet.balance}`);
+    } else {
+      console.warn("Farmer wallet not found in registry");
+    }
+
+    // Update validators' wallets (split validator share equally).
+    const validatorIds = Object.keys(transaction.validatorApprovals || {});
+    if (validatorIds.length > 0) {
+      const perValidatorPayment = validatorShare / validatorIds.length;
+      validatorIds.forEach(vid => {
+        if (walletRegistry[vid]) {
+          walletRegistry[vid].balance += perValidatorPayment;
+          console.log(`Validator ${vid} new balance: ${walletRegistry[vid].balance}`);
+        } else {
+          console.warn(`Validator wallet ${vid} not found in registry`);
+        }
       });
     }
+
+    // Deduct the distributed amount (farmerShare + validatorShare) from the platform wallet.
+    if (platformWallet) {
+      platformWallet.balance -= (farmerShare + validatorShare);
+      console.log(`Platform wallet new balance: ${platformWallet.balance}`);
+    } else {
+      console.warn("Platform wallet not found in registry");
+    }
+
+    // Optionally, you can store or broadcast the distributionDetails along with the signature.
+    return { distributionDetails, signature };
+  
   }
 
   calculateValidatorPayments(transaction, totalValidatorShare) {

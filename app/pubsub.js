@@ -1,10 +1,11 @@
+// pubsub.js
 const PubNub = require('pubnub');
 
 const credentials = {
   publishKey: 'pub-c-9f4a9266-8211-4429-9607-25e0777c3d1f',
   subscribeKey: 'sub-c-ed5cb068-328c-4a55-8779-4f88a9bfeecd',
   secretKey: 'sec-c-NjI5OGE0NjYtNWQ2OS00YTMyLThlZmUtYWU4MWFiYWYwM2Rm',
-  timeout:"30000"
+  timeout: "30000"
 };
 
 const CHANNELS = {
@@ -15,18 +16,22 @@ const CHANNELS = {
   PAYMENT: 'PAYMENT',
   VALIDATOR_ASSIGNMENT: 'VALIDATOR_ASSIGNMENT',
   USER_REGISTRATION: 'USER_REGISTRATION',
-  VALIDATOR_REGISTRATION: 'VALIDATOR_REGISTRATION', 
-  VALIDATOR_POOL: 'VALIDATOR_POOL'
+  VALIDATOR_REGISTRATION: 'VALIDATOR_REGISTRATION',
+  VALIDATOR_POOL: 'VALIDATOR_POOL',
+  WALLET_REGISTRY: 'WALLET_REGISTRY' // New channel for wallet registration updates
 };
 
 class PubSub {
-  constructor({ blockchain, transactionPool, validatorPool, paymentProcessor, qualityCheck, userRegistry }) {
+  constructor({ blockchain, transactionPool, validatorPool, paymentProcessor, qualityCheck, userRegistry, walletRegistry }) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
     this.validatorPool = validatorPool;
     this.paymentProcessor = paymentProcessor;
     this.qualityCheck = qualityCheck;
     this.userRegistry = userRegistry;
+    // Pass in the local wallet registry (an object) so that we can update it.
+    this.walletRegistry = walletRegistry;
+
     this.pubnub = new PubNub(credentials);
     this.pubnub.subscribe({ channels: Object.values(CHANNELS) });
     this.pubnub.addListener(this.createListener());
@@ -66,6 +71,11 @@ class PubSub {
       case CHANNELS.VALIDATOR_POOL:
         console.log(`🔄 Syncing Validator Pool`);
         this.validatorPool.syncValidatorPool(parsedMessage);
+        break;
+      case CHANNELS.WALLET_REGISTRY:
+        // Merge incoming wallet data with local wallet registry
+        console.log(`🔄 Wallet registry update received: ${JSON.stringify(parsedMessage)}`);
+        Object.assign(this.walletRegistry, parsedMessage);
         break;
       default:
         console.warn(`⚠️ Unknown channel: ${channel}`);
@@ -113,6 +123,15 @@ class PubSub {
       message: JSON.stringify(this.validatorPool.validators)
     });
     console.log(`✅ Broadcasted Validator Pool.`);
+  }
+
+  broadcastWalletRegistry() {
+    // Broadcast the entire wallet registry. In practice, you might broadcast only new entries.
+    this.publish({
+      channel: CHANNELS.WALLET_REGISTRY,
+      message: JSON.stringify(this.walletRegistry)
+    });
+    console.log(`✅ Broadcasted Wallet Registry.`);
   }
 }
 

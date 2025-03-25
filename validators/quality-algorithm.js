@@ -8,20 +8,20 @@ class QualityCheck {
       return { qualityScore: 0, decision: "REJECT", reason: "Missing IoT or sample data." };
     }
 
-    const weightage = {
-      temperature: 0.3,
-      humidity: 0.2,
-      freshness: 0.5
-    };
+    // const weightage = {
+    //   temperature: 0.3,
+    //   humidity: 0.2,
+    //   freshness: 0.5
+    // };
 
     let weightedScore = 0;
-    for (let key in weightage) {
+    for (let key in iotData) {
       if (iotData[key] !== undefined && sampleData[key] !== undefined) {
         const iotValue = Number(iotData[key]);
         const sampleValue = Number(sampleData[key]);
         const difference = Math.abs(iotValue - sampleValue);
         const matchScore = Math.max(0, 100 - (difference * 2));
-        weightedScore += matchScore * weightage[key];
+        weightedScore += matchScore * 0.5;
         console.log(`Key: ${key}, IoT: ${iotValue}, Sample: ${sampleValue}, Diff: ${difference}, MatchScore: ${matchScore}`);
       } else {
         console.warn(`Key ${key} missing in one of the datasets.`);

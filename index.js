@@ -18,9 +18,25 @@ const IPFS = require('./util/ipfs');
 const app = express();
 const blockchain = new Blockchain();
 const transactionPool = new TransactionPool();
+
+
+
+const { walletRegistry, registerWallet } = require('./wallet/walletRegistry');
+const {initialPlatformBalance}=require('./config');
+const platformWallet = new Wallet();
+platformWallet.publicKey = "PLATFORM_WALLET";
+platformWallet.balance = initialPlatformBalance;
+walletRegistry[platformWallet.publicKey] = platformWallet;
+
+
+
 let wallet = new Wallet();
+
+
+
+
 const validatorPool = new ValidatorPool();
-const pubsub = new PubSub({ blockchain, transactionPool, validatorPool });
+const pubsub = new PubSub({ blockchain, transactionPool, validatorPool,walletRegistry });
 const transactionMiner = new TransactionMiner({ blockchain, transactionPool, wallet, pubsub, validatorPool });
 
 app.use(bodyParser.json());
@@ -44,6 +60,9 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: "Insufficient balance to stake as validator" });
     }
   }
+  walletRegistry[wallet.publicKey]=wallet;
+  // pubsub.broadcastWalletRegistry(walletRegistry);
+
   res.json({ message: `Registered as ${role}`, address: wallet.publicKey, staked: wallet.stake });
 });
 
