@@ -4,6 +4,72 @@ import { Link } from "react-router-dom";
 import "./ValidatorDashboard.css";
 import WalletInfo from "./Wallet";
 
+const TransactionCard = ({ tx, validatorId, handleValidation, handleFileChange }) => {
+  const [showIotData, setShowIotData] = useState(false);
+  const [iotData, setIotData] = useState(null);
+
+  // Fetch IoT data from IPFS if it's a hash string
+  useEffect(() => {
+    if (typeof tx.iotData === 'string') {
+      fetch(`${document.location.origin}/api/ipfs/${tx.iotData}`)
+        .then((res) => res.json())
+        .then((data) => setIotData(data))
+        .catch((err) => console.error("Error retrieving IoT data:", err));
+    } else {
+      setIotData(tx.iotData);
+    }
+  }, [tx.iotData]);
+
+  const toggleIotData = () => setShowIotData(!showIotData);
+
+  return (
+    <div className="transaction-card">
+      <h3>Transaction ID: {tx.id}</h3>
+      <p>
+        <strong>Farmer ID:</strong> {tx.input.address}
+      </p>
+      <p>
+        <strong>Price per Kg:</strong> ${tx.pricePerKg} |{" "}
+        <strong>Quantity:</strong> {tx.quantity} kg
+      </p>
+      <div className="iot-data-section">
+        <button onClick={toggleIotData} className="toggle-btn">
+          {showIotData ? "Hide IoT Data" : "Show IoT Data"}
+        </button>
+        {showIotData && (
+          <div className="iot-data">
+            {iotData ? (
+              <pre>{JSON.stringify(iotData, null, 2)}</pre>
+            ) : (
+              <p>Loading IoT data...</p>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="csv-upload-section">
+        <p>Upload CSV file with physical sample data:</p>
+        <label htmlFor={`csvInput-${tx.id}`} className="file-label">
+          Choose CSV File
+        </label>
+        <input
+          id={`csvInput-${tx.id}`}
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+        />
+      </div>
+      <div className="validation-buttons">
+        <button onClick={() => handleValidation(tx.id, "APPROVED")}>
+          Approve
+        </button>
+        <button onClick={() => handleValidation(tx.id, "REJECTED")}>
+          Reject
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const ValidatorDashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [sampleData, setSampleData] = useState(null); // Parsed CSV data for physical samples
@@ -27,7 +93,7 @@ const ValidatorDashboard = () => {
     fetchWalletInfo();
   }, []);
 
-  // Fetch transactions assigned to this validator, once validatorId is available.
+  // Fetch transactions assigned to this validator
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -35,7 +101,9 @@ const ValidatorDashboard = () => {
         const data = await res.json();
         // Filter transactions that include the validator's public key in assignedValidators.
         const txList = Object.values(data).filter(
-          (tx) => tx.assignedValidators && tx.assignedValidators.includes(validatorId)
+          (tx) =>
+            tx.assignedValidators &&
+            tx.assignedValidators.includes(validatorId)
         );
         setTransactions(txList);
       } catch (err) {
@@ -119,43 +187,13 @@ const ValidatorDashboard = () => {
           <p>No pending transactions.</p>
         ) : (
           transactions.map((tx) => (
-            <div key={tx.id} className="transaction-card">
-              <h3>Transaction ID: {tx.id}</h3>
-              <p>
-                <strong>Farmer ID:</strong> {tx.input.address}
-              </p>
-              <p>
-                <strong>Price per Kg:</strong> ${tx.pricePerKg} |{" "}
-                <strong>Quantity:</strong> {tx.quantity} kg
-              </p>
-              <p>
-                <strong>IoT Data:</strong>{" "}
-                <a
-                  href={`http://127.0.0.1:5001/webui/${tx.iotData}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View on IPFS
-                </a>
-              </p>
-
-              <div className="csv-upload-section">
-  <p>Upload CSV file with physical sample data:</p>
-  {/* Associate the label with the hidden file input via htmlFor and id */}
-  <label htmlFor="csvInput">Choose CSV File</label>
-  <input 
-    id="csvInput" 
-    type="file" 
-    accept=".csv" 
-    onChange={handleFileChange} 
-  />
-</div>
-
-              <div className="validation-buttons">
-                <button onClick={() => handleValidation(tx.id, "APPROVED")}>Approve</button>
-                <button onClick={() => handleValidation(tx.id, "REJECTED")}>Reject</button>
-              </div>
-            </div>
+            <TransactionCard
+              key={tx.id}
+              tx={tx}
+              validatorId={validatorId}
+              handleValidation={handleValidation}
+              handleFileChange={handleFileChange}
+            />
           ))
         )}
       </div>

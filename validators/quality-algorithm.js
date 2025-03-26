@@ -174,7 +174,7 @@ class QualityCheck {
 
     // Decision thresholds.
     let decision, reason;
-    if (qualityScore < 5) {
+    if (qualityScore < 7) {
       decision = "AUTO_APPROVE";
       reason = "Farmer data strongly matches validator data.";
     } else if (qualityScore < 10) {

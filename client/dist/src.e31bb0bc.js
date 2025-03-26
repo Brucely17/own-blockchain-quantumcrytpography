@@ -34481,36 +34481,98 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; } // src/components/ValidatorDashboard.js
-var ValidatorDashboard = function ValidatorDashboard() {
-  var _useState = (0, _react.useState)([]),
+var TransactionCard = function TransactionCard(_ref) {
+  var tx = _ref.tx,
+    validatorId = _ref.validatorId,
+    handleValidation = _ref.handleValidation,
+    handleFileChange = _ref.handleFileChange;
+  var _useState = (0, _react.useState)(false),
     _useState2 = _slicedToArray(_useState, 2),
-    transactions = _useState2[0],
-    setTransactions = _useState2[1];
+    showIotData = _useState2[0],
+    setShowIotData = _useState2[1];
   var _useState3 = (0, _react.useState)(null),
     _useState4 = _slicedToArray(_useState3, 2),
-    sampleData = _useState4[0],
-    setSampleData = _useState4[1]; // Parsed CSV data for physical samples
-  var _useState5 = (0, _react.useState)(""),
+    iotData = _useState4[0],
+    setIotData = _useState4[1];
+
+  // Fetch IoT data from IPFS if it's a hash string
+  (0, _react.useEffect)(function () {
+    if (typeof tx.iotData === 'string') {
+      fetch("".concat(document.location.origin, "/api/ipfs/").concat(tx.iotData)).then(function (res) {
+        return res.json();
+      }).then(function (data) {
+        return setIotData(data);
+      }).catch(function (err) {
+        return console.error("Error retrieving IoT data:", err);
+      });
+    } else {
+      setIotData(tx.iotData);
+    }
+  }, [tx.iotData]);
+  var toggleIotData = function toggleIotData() {
+    return setShowIotData(!showIotData);
+  };
+  return /*#__PURE__*/_react.default.createElement("div", {
+    className: "transaction-card"
+  }, /*#__PURE__*/_react.default.createElement("h3", null, "Transaction ID: ", tx.id), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Farmer ID:"), " ", tx.input.address), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Price per Kg:"), " $", tx.pricePerKg, " |", " ", /*#__PURE__*/_react.default.createElement("strong", null, "Quantity:"), " ", tx.quantity, " kg"), /*#__PURE__*/_react.default.createElement("div", {
+    className: "iot-data-section"
+  }, /*#__PURE__*/_react.default.createElement("button", {
+    onClick: toggleIotData,
+    className: "toggle-btn"
+  }, showIotData ? "Hide IoT Data" : "Show IoT Data"), showIotData && /*#__PURE__*/_react.default.createElement("div", {
+    className: "iot-data"
+  }, iotData ? /*#__PURE__*/_react.default.createElement("pre", null, JSON.stringify(iotData, null, 2)) : /*#__PURE__*/_react.default.createElement("p", null, "Loading IoT data..."))), /*#__PURE__*/_react.default.createElement("div", {
+    className: "csv-upload-section"
+  }, /*#__PURE__*/_react.default.createElement("p", null, "Upload CSV file with physical sample data:"), /*#__PURE__*/_react.default.createElement("label", {
+    htmlFor: "csvInput-".concat(tx.id),
+    className: "file-label"
+  }, "Choose CSV File"), /*#__PURE__*/_react.default.createElement("input", {
+    id: "csvInput-".concat(tx.id),
+    type: "file",
+    accept: ".csv",
+    onChange: handleFileChange
+  })), /*#__PURE__*/_react.default.createElement("div", {
+    className: "validation-buttons"
+  }, /*#__PURE__*/_react.default.createElement("button", {
+    onClick: function onClick() {
+      return handleValidation(tx.id, "APPROVED");
+    }
+  }, "Approve"), /*#__PURE__*/_react.default.createElement("button", {
+    onClick: function onClick() {
+      return handleValidation(tx.id, "REJECTED");
+    }
+  }, "Reject")));
+};
+var ValidatorDashboard = function ValidatorDashboard() {
+  var _useState5 = (0, _react.useState)([]),
     _useState6 = _slicedToArray(_useState5, 2),
-    validatorId = _useState6[0],
-    setValidatorId = _useState6[1];
+    transactions = _useState6[0],
+    setTransactions = _useState6[1];
   var _useState7 = (0, _react.useState)(null),
     _useState8 = _slicedToArray(_useState7, 2),
-    selectedFile = _useState8[0],
-    setSelectedFile = _useState8[1];
+    sampleData = _useState8[0],
+    setSampleData = _useState8[1]; // Parsed CSV data for physical samples
   var _useState9 = (0, _react.useState)(""),
     _useState10 = _slicedToArray(_useState9, 2),
-    responseMessage = _useState10[0],
-    setResponseMessage = _useState10[1];
-  var _useState11 = (0, _react.useState)({}),
+    validatorId = _useState10[0],
+    setValidatorId = _useState10[1];
+  var _useState11 = (0, _react.useState)(null),
     _useState12 = _slicedToArray(_useState11, 2),
-    walletInfo = _useState12[0],
-    setWalletInfo = _useState12[1];
+    selectedFile = _useState12[0],
+    setSelectedFile = _useState12[1];
+  var _useState13 = (0, _react.useState)(""),
+    _useState14 = _slicedToArray(_useState13, 2),
+    responseMessage = _useState14[0],
+    setResponseMessage = _useState14[1];
+  var _useState15 = (0, _react.useState)({}),
+    _useState16 = _slicedToArray(_useState15, 2),
+    walletInfo = _useState16[0],
+    setWalletInfo = _useState16[1];
 
   // Fetch validator's wallet info on mount
   (0, _react.useEffect)(function () {
     var fetchWalletInfo = /*#__PURE__*/function () {
-      var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+      var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
         var res, data;
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
@@ -34539,16 +34601,16 @@ var ValidatorDashboard = function ValidatorDashboard() {
         }, _callee, null, [[0, 11]]);
       }));
       return function fetchWalletInfo() {
-        return _ref.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       };
     }();
     fetchWalletInfo();
   }, []);
 
-  // Fetch transactions assigned to this validator, once validatorId is available.
+  // Fetch transactions assigned to this validator
   (0, _react.useEffect)(function () {
     var fetchTransactions = /*#__PURE__*/function () {
-      var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+      var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
         var res, data, txList;
         return _regeneratorRuntime().wrap(function _callee2$(_context2) {
           while (1) switch (_context2.prev = _context2.next) {
@@ -34580,7 +34642,7 @@ var ValidatorDashboard = function ValidatorDashboard() {
         }, _callee2, null, [[0, 11]]);
       }));
       return function fetchTransactions() {
-        return _ref2.apply(this, arguments);
+        return _ref3.apply(this, arguments);
       };
     }();
     if (validatorId) {
@@ -34618,7 +34680,7 @@ var ValidatorDashboard = function ValidatorDashboard() {
 
   // Handle transaction validation (approve/reject)
   var handleValidation = /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(transactionId, approval) {
+    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(transactionId, approval) {
       var reader;
       return _regeneratorRuntime().wrap(function _callee4$(_context4) {
         while (1) switch (_context4.prev = _context4.next) {
@@ -34632,7 +34694,7 @@ var ValidatorDashboard = function ValidatorDashboard() {
           case 3:
             reader = new FileReader();
             reader.onload = /*#__PURE__*/function () {
-              var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(event) {
+              var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(event) {
                 var csvText, parsedSampleData, payload, response, data;
                 return _regeneratorRuntime().wrap(function _callee3$(_context3) {
                   while (1) switch (_context3.prev = _context3.next) {
@@ -34682,7 +34744,7 @@ var ValidatorDashboard = function ValidatorDashboard() {
                 }, _callee3, null, [[7, 17]]);
               }));
               return function (_x3) {
-                return _ref4.apply(this, arguments);
+                return _ref5.apply(this, arguments);
               };
             }();
             reader.readAsText(selectedFile);
@@ -34693,7 +34755,7 @@ var ValidatorDashboard = function ValidatorDashboard() {
       }, _callee4);
     }));
     return function handleValidation(_x, _x2) {
-      return _ref3.apply(this, arguments);
+      return _ref4.apply(this, arguments);
     };
   }();
   return /*#__PURE__*/_react.default.createElement("div", {
@@ -34705,33 +34767,13 @@ var ValidatorDashboard = function ValidatorDashboard() {
   }), /*#__PURE__*/_react.default.createElement("p", null, "Validator ID: ", validatorId || "Fetching..."), /*#__PURE__*/_react.default.createElement("p", null, "Review and validate produce transactions."), /*#__PURE__*/_react.default.createElement("div", {
     className: "transactions"
   }, transactions.length === 0 ? /*#__PURE__*/_react.default.createElement("p", null, "No pending transactions.") : transactions.map(function (tx) {
-    return /*#__PURE__*/_react.default.createElement("div", {
+    return /*#__PURE__*/_react.default.createElement(TransactionCard, {
       key: tx.id,
-      className: "transaction-card"
-    }, /*#__PURE__*/_react.default.createElement("h3", null, "Transaction ID: ", tx.id), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Farmer ID:"), " ", tx.input.address), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "Price per Kg:"), " $", tx.pricePerKg, " |", " ", /*#__PURE__*/_react.default.createElement("strong", null, "Quantity:"), " ", tx.quantity, " kg"), /*#__PURE__*/_react.default.createElement("p", null, /*#__PURE__*/_react.default.createElement("strong", null, "IoT Data:"), " ", /*#__PURE__*/_react.default.createElement("a", {
-      href: "http://127.0.0.1:5001/webui/".concat(tx.iotData),
-      target: "_blank",
-      rel: "noopener noreferrer"
-    }, "View on IPFS")), /*#__PURE__*/_react.default.createElement("div", {
-      className: "csv-upload-section"
-    }, /*#__PURE__*/_react.default.createElement("p", null, "Upload CSV file with physical sample data:"), /*#__PURE__*/_react.default.createElement("label", {
-      htmlFor: "csvInput"
-    }, "Choose CSV File"), /*#__PURE__*/_react.default.createElement("input", {
-      id: "csvInput",
-      type: "file",
-      accept: ".csv",
-      onChange: handleFileChange
-    })), /*#__PURE__*/_react.default.createElement("div", {
-      className: "validation-buttons"
-    }, /*#__PURE__*/_react.default.createElement("button", {
-      onClick: function onClick() {
-        return handleValidation(tx.id, "APPROVED");
-      }
-    }, "Approve"), /*#__PURE__*/_react.default.createElement("button", {
-      onClick: function onClick() {
-        return handleValidation(tx.id, "REJECTED");
-      }
-    }, "Reject")));
+      tx: tx,
+      validatorId: validatorId,
+      handleValidation: handleValidation,
+      handleFileChange: handleFileChange
+    });
   })), responseMessage && /*#__PURE__*/_react.default.createElement("p", {
     className: "response"
   }, responseMessage), /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement(_reactRouterDom.Link, {
@@ -35169,7 +35211,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42409" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41527" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

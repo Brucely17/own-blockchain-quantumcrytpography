@@ -308,115 +308,123 @@ a:hover {
     filter: none;
   }
   
-/* src/components/ValidatorDashboard.css */
+/* ValidatorDashboard.css */
+
 .validator-container {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 40px 30px;
   max-width: 900px;
   margin: 40px auto;
-  color: var(--white);
-  text-align: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 15px;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
 }
 
 .validator-container h1 {
-  font-size: 2.5rem;
-  color: var(--bright-purple);
+  text-align: center;
   margin-bottom: 20px;
+  color: #9a5fe5;
 }
 
 .validator-container p {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.transactions {
+  margin-top: 20px;
+}
+
+.transaction-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #a9a8ac;
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.transaction-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.transaction-card h3 {
+  margin: 0;
   font-size: 1.2rem;
-  margin: 10px 0;
+  color: #9a5fe5;
+}
+
+.transaction-card p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.iot-data-section {
+  margin-top: 10px;
+}
+
+.toggle-btn {
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  background-color: #9a5fe5;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggle-btn:hover {
+  background-color: #803fd1;
+}
+
+.iot-data {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 5px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
 }
 
 .csv-upload-section {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px dashed var(--muted-gray);
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  margin: 20px 0;
-  transition: background 0.3s ease, border-color 0.3s ease;
-}
-
-.csv-upload-section:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: var(--bright-purple);
+  margin-top: 15px;
 }
 
 .csv-upload-section p {
-  font-size: 1rem;
-  margin-bottom: 15px;
-  color: var(--white);
+  margin: 5px 0;
+  font-size: 0.9rem;
 }
 
-/* Hide the default file input */
+.file-label {
+  display: inline-block;
+  padding: 8px 12px;
+  background-color: #9a5fe5;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
 .csv-upload-section input[type="file"] {
   display: none;
 }
 
-/* Style a custom label for the file input */
-.csv-upload-section label {
-  display: inline-block;
-  padding: 12px 25px;
-  background-color: var(--bright-purple);
-  color: var(--white);
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.csv-upload-section label:hover {
-  background-color: #803fd1;
-}
-
-
-.transactions {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.transaction-card {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  padding: 20px;
-  text-align: left;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-}
-
-.transaction-card h3 {
-  margin-bottom: 10px;
-  font-size: 1.4rem;
-  color: var(--bright-purple);
-}
-
-.transaction-card p {
-  margin: 8px 0;
-  font-size: 1rem;
-}
-
 .validation-buttons {
-  display: flex;
-  gap: 15px;
   margin-top: 15px;
 }
 
 .validation-buttons button {
-  padding: 12px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  background-color: #9a5fe5;
+  color: #fff;
   border: none;
-  background-color: var(--bright-purple);
-  color: var(--white);
+  border-radius: 5px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  margin-right: 10px;
+  transition: background-color 0.2s ease;
 }
 
 .validation-buttons button:hover {
@@ -425,8 +433,12 @@ a:hover {
 
 .response {
   margin-top: 20px;
-  font-size: 1.1rem;
-  color: var(--bright-purple);
+  padding: 10px;
+  background-color: rgba(154, 95, 229, 0.2);
+  border: 1px solid #9a5fe5;
+  border-radius: 5px;
+  font-size: 1rem;
+  text-align: center;
 }
 
 /* CustomerDashboard.css */

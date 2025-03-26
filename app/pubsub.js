@@ -2,9 +2,9 @@
 const PubNub = require('pubnub');
 
 const credentials = {
-  publishKey: 'pub-c-9f4a9266-8211-4429-9607-25e0777c3d1f',
-  subscribeKey: 'sub-c-ed5cb068-328c-4a55-8779-4f88a9bfeecd',
-  secretKey: 'sec-c-NjI5OGE0NjYtNWQ2OS00YTMyLThlZmUtYWU4MWFiYWYwM2Rm',
+  publishKey: 'pub-c-4bf8cc46-df39-42b9-bd9c-a6fd1be14fb3',
+  subscribeKey: 'sub-c-b007d9fa-851c-494e-b058-1757a97c14ac',
+  secretKey: 'sec-c-MGJkODEyOTQtYWI2Ni00ZmEyLWExNTQtZGM4YzE2MjE0Yjg1',
   timeout: "30000"
 };
 
